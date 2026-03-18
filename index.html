@@ -8,31 +8,38 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a3a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;overflow:hidden;user-select:none;-webkit-user-select:none}
 canvas{display:block;touch-action:none}
-#menu{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#0d2b1a,#1a472a);z-index:20}
-#menu h1{font-size:48px;color:#ffd700;text-shadow:0 0 30px #ffd700;margin-bottom:8px;font-family:Arial Black,sans-serif;letter-spacing:2px}
-#menu .sub{font-size:16px;color:#90ee90;margin-bottom:30px;letter-spacing:3px;font-family:Arial,sans-serif}
-#menu .pars{font-size:90px;margin-bottom:15px;animation:bounce 1s ease-in-out infinite}
-.play-btn{background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;padding:20px 60px;border-radius:50px;font-size:26px;font-weight:bold;color:#1a0a2e;cursor:pointer;font-family:Arial Black,sans-serif;-webkit-tap-highlight-color:transparent;box-shadow:0 8px 25px rgba(255,215,0,0.4)}
-#oldu{position:fixed;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);z-index:20}
-#oldu h2{font-size:44px;color:#ff4444;font-family:Arial Black,sans-serif;margin-bottom:15px}
-#oldu .s1{font-size:30px;color:#ffd700;font-family:Arial,sans-serif;margin-bottom:8px}
+#menu{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#061a0e,#0d2b18,#1a472a);z-index:20}
+#menu h1{font-size:48px;color:#ffd700;text-shadow:0 0 30px #ffd700,0 0 60px #ffd70066;margin-bottom:8px;font-family:Arial Black,sans-serif;letter-spacing:3px}
+#menu .sub{font-size:16px;color:#90ee90;margin-bottom:30px;letter-spacing:4px;font-family:Arial,sans-serif}
+#menu .pars-icon{font-size:90px;margin-bottom:15px;animation:bounce 1s ease-in-out infinite;filter:drop-shadow(0 0 20px #ffd70088)}
+.play-btn{background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;padding:20px 60px;border-radius:50px;font-size:26px;font-weight:bold;color:#1a0a2e;cursor:pointer;font-family:Arial Black,sans-serif;-webkit-tap-highlight-color:transparent;box-shadow:0 8px 30px rgba(255,215,0,0.5);letter-spacing:2px}
+#oldu{position:fixed;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.88);z-index:20;backdrop-filter:blur(6px)}
+#oldu h2{font-size:44px;color:#ff4444;font-family:Arial Black,sans-serif;margin-bottom:15px;text-shadow:0 0 20px #ff444488}
+#oldu .s1{font-size:38px;color:#ffd700;font-family:Arial Black,sans-serif;margin-bottom:8px;text-shadow:0 0 20px #ffd70088}
 #oldu .s2{font-size:18px;color:#90ee90;font-family:Arial,sans-serif;margin-bottom:35px}
-#skor{position:fixed;top:15px;left:50%;transform:translateX(-50%);font-size:52px;font-weight:bold;color:white;text-shadow:3px 3px 0 #000,0 0 20px #ffd700;z-index:10;font-family:Arial Black,sans-serif;pointer-events:none}
+#skor-wrap{position:fixed;top:15px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;text-align:center}
+#skor{font-size:56px;font-weight:bold;color:white;font-family:Arial Black,sans-serif;text-shadow:0 4px 0 #00000088,0 0 30px #ffd70099;letter-spacing:2px}
+#skor-kucuk{font-size:12px;color:#ffd70088;font-family:Arial,sans-serif;letter-spacing:3px;margin-top:-6px}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+@keyframes sarsinti{0%,100%{transform:translate(0,0)}20%{transform:translate(-8px,8px)}40%{transform:translate(8px,-8px)}60%{transform:translate(-6px,4px)}80%{transform:translate(6px,-4px)}}
+.sarsin{animation:sarsinti 0.45s ease}
 </style>
 </head>
 <body>
 <div id="menu">
-  <div class="pars">🐆</div>
+  <div class="pars-icon">🐆</div>
   <h1>FLAPPY PARS</h1>
   <p class="sub">ORMAN MACERASI</p>
   <button class="play-btn" id="playBtn">▶ OYNA</button>
 </div>
-<div id="skor" style="display:none">0</div>
+<div id="skor-wrap" style="display:none">
+  <div id="skor">0</div>
+  <div id="skor-kucuk">SKOR</div>
+</div>
 <div id="oldu">
   <h2>💀 ÇARPTIN!</h2>
-  <div class="s1" id="sonSkor">Skor: 0</div>
-  <div class="s2" id="enYuksekGoster">En Yüksek: 0</div>
+  <div class="s1" id="sonSkor">0</div>
+  <div class="s2" id="enYuksekGoster">🏆 En Yüksek: 0</div>
   <button class="play-btn" id="tekrarBtn">🔄 TEKRAR</button>
 </div>
 <canvas id="c"></canvas>
@@ -47,18 +54,255 @@ let pars,borular,skor,enYuksek=0,aktif=false,raf,ilkZiplama=false;
 
 const BGENISLIK=Math.floor(W*0.15);
 const ARALIK=Math.floor(H*0.32);
-const PARSBOY=Math.floor(W*0.11);
+const PARSBOY=Math.floor(W*0.09);
 const PARSX=W*0.25;
+const YER_YAVASH=0.06;
+const YER_NORMAL=0.28;
+const ZIPLAMA=-H*0.008;
 
-// Fizik
-const YER_YAVASH=0.06;   // ilk zıplamadan önce yavaş düşüş
-const YER_NORMAL=0.28;   // normal yerçekimi
-const ZIPLAMA=-H*0.008;  // zıplama gücü
+function parssCiz(x,y,vy){
+  const s=PARSBOY;
+  const yukari=vy<-1;
+  const asagi=vy>3;
+  
+  ctx.save();
+  ctx.translate(x,y);
+  
+  // Hafif eğim yüze göre
+  const aci=Math.min(Math.max(vy*1.5,-20),35)*Math.PI/180;
+  ctx.rotate(aci);
+
+  // Gölge
+  ctx.shadowColor='rgba(0,0,0,0.4)';
+  ctx.shadowBlur=10;
+  ctx.shadowOffsetY=4;
+
+  // VÜCUT
+  ctx.beginPath();
+  ctx.ellipse(0,0,s*0.7,s*0.45,0,0,Math.PI*2);
+  const vucutGrad=ctx.createRadialGradient(-s*0.1,-s*0.1,s*0.1,0,0,s*0.7);
+  vucutGrad.addColorStop(0,'#f5a623');
+  vucutGrad.addColorStop(0.5,'#e8921a');
+  vucutGrad.addColorStop(1,'#c47010');
+  ctx.fillStyle=vucutGrad;
+  ctx.fill();
+
+  // KARIN (açık renk)
+  ctx.beginPath();
+  ctx.ellipse(s*0.05,s*0.1,s*0.35,s*0.28,0.1,0,Math.PI*2);
+  ctx.fillStyle='#fce8c0';
+  ctx.fill();
+
+  // BENEKLER
+  const benekler=[
+    {x:-s*0.3,y:-s*0.15,r:s*0.08},
+    {x:-s*0.1,y:-s*0.2,r:s*0.07},
+    {x:s*0.15,y:-s*0.18,r:s*0.08},
+    {x:s*0.35,y:-s*0.1,r:s*0.06},
+    {x:-s*0.25,y:s*0.05,r:s*0.07},
+    {x:s*0.0,y:s*0.05,r:s*0.08},
+    {x:s*0.25,y:s*0.08,r:s*0.06},
+  ];
+  ctx.fillStyle='#8b4513';
+  benekler.forEach(b=>{
+    ctx.beginPath();
+    ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  // BACAKLAR
+  ctx.strokeStyle='#c47010';
+  ctx.lineWidth=s*0.12;
+  ctx.lineCap='round';
+  
+  // Ön bacaklar
+  ctx.beginPath();
+  ctx.moveTo(s*0.2,s*0.2);
+  ctx.lineTo(s*0.3,s*(yukari?0.1:0.45));
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(s*0.05,s*0.25);
+  ctx.lineTo(s*0.1,s*(yukari?0.1:0.5));
+  ctx.stroke();
+  
+  // Arka bacaklar
+  ctx.beginPath();
+  ctx.moveTo(-s*0.35,s*0.2);
+  ctx.lineTo(-s*0.45,s*(asagi?0.5:0.4));
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(-s*0.2,s*0.25);
+  ctx.lineTo(-s*0.25,s*(asagi?0.5:0.45));
+  ctx.stroke();
+
+  // KUYRUK
+  ctx.beginPath();
+  ctx.moveTo(-s*0.65,s*0.05);
+  ctx.bezierCurveTo(-s*0.9,s*0.1,-s*0.95,-s*0.2,-s*0.75,-s*0.3);
+  ctx.strokeStyle='#e8921a';
+  ctx.lineWidth=s*0.1;
+  ctx.lineCap='round';
+  ctx.stroke();
+  // Kuyruk ucu beneği
+  ctx.beginPath();
+  ctx.arc(-s*0.75,-s*0.3,s*0.08,0,Math.PI*2);
+  ctx.fillStyle='#8b4513';
+  ctx.fill();
+
+  // BAŞ
+  ctx.shadowBlur=0;
+  ctx.beginPath();
+  ctx.arc(s*0.6,yukari?-s*0.35:-s*0.15,s*0.38,0,Math.PI*2);
+  const basGrad=ctx.createRadialGradient(s*0.5,yukari?-s*0.4:-s*0.2,s*0.05,s*0.6,yukari?-s*0.35:-s*0.15,s*0.38);
+  basGrad.addColorStop(0,'#f5a623');
+  basGrad.addColorStop(0.6,'#e8921a');
+  basGrad.addColorStop(1,'#c47010');
+  ctx.fillStyle=basGrad;
+  ctx.fill();
+
+  // YÜZ - Alın beyazı
+  const hy=yukari?-s*0.35:-s*0.15;
+  ctx.beginPath();
+  ctx.ellipse(s*0.65,hy+s*0.05,s*0.2,s*0.25,0,0,Math.PI*2);
+  ctx.fillStyle='#fce8c0';
+  ctx.fill();
+
+  // KULAKLAR
+  ctx.fillStyle='#e8921a';
+  ctx.beginPath();
+  ctx.moveTo(s*0.45,hy-s*0.28);
+  ctx.lineTo(s*0.3,hy-s*0.5);
+  ctx.lineTo(s*0.6,hy-s*0.35);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(s*0.7,hy-s*0.28);
+  ctx.lineTo(s*0.85,hy-s*0.5);
+  ctx.lineTo(s*0.75,hy-s*0.2);
+  ctx.fill();
+  // Kulak içi
+  ctx.fillStyle='#ff8c69';
+  ctx.beginPath();
+  ctx.moveTo(s*0.47,hy-s*0.3);
+  ctx.lineTo(s*0.35,hy-s*0.44);
+  ctx.lineTo(s*0.57,hy-s*0.33);
+  ctx.fill();
+
+  // GÖZLER
+  // Göz beyazı
+  ctx.beginPath();
+  ctx.arc(s*0.55,hy-s*0.1,s*0.1,0,Math.PI*2);
+  ctx.fillStyle='white';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(s*0.72,hy-s*0.1,s*0.1,0,Math.PI*2);
+  ctx.fillStyle='white';
+  ctx.fill();
+  // Göz bebekleri
+  ctx.beginPath();
+  ctx.arc(s*0.57,hy-s*0.09,s*0.06,0,Math.PI*2);
+  ctx.fillStyle='#1a1a1a';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(s*0.74,hy-s*0.09,s*0.06,0,Math.PI*2);
+  ctx.fillStyle='#1a1a1a';
+  ctx.fill();
+  // Göz parıltısı
+  ctx.beginPath();
+  ctx.arc(s*0.59,hy-s*0.12,s*0.025,0,Math.PI*2);
+  ctx.fillStyle='white';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(s*0.76,hy-s*0.12,s*0.025,0,Math.PI*2);
+  ctx.fillStyle='white';
+  ctx.fill();
+
+  // BURUN
+  ctx.beginPath();
+  ctx.arc(s*0.78,hy+s*0.05,s*0.06,0,Math.PI*2);
+  ctx.fillStyle='#ff6b6b';
+  ctx.fill();
+
+  // AĞIZ (gülümseyen)
+  ctx.beginPath();
+  ctx.moveTo(s*0.68,hy+s*0.1);
+  ctx.quadraticCurveTo(s*0.78,hy+s*0.18,s*0.88,hy+s*0.1);
+  ctx.strokeStyle='#8b4513';
+  ctx.lineWidth=s*0.04;
+  ctx.lineCap='round';
+  ctx.stroke();
+
+  // Yüz benekleri (leopar)
+  ctx.fillStyle='rgba(139,69,19,0.6)';
+  [[s*0.52,hy+s*0.02,s*0.04],[s*0.63,hy+s*0.08,s*0.035],[s*0.85,hy+s*0.02,s*0.04]].forEach(([bx,by,br])=>{
+    ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fill();
+  });
+
+  ctx.restore();
+}
+
+function agacCiz(x,y1,y2,ust){
+  const govdeG=Math.floor(BGENISLIK*0.3);
+  const govdeX=x+BGENISLIK/2-govdeG/2;
+  
+  // Gövde
+  const govdeGrad=ctx.createLinearGradient(govdeX,0,govdeX+govdeG,0);
+  govdeGrad.addColorStop(0,'#2a1200');
+  govdeGrad.addColorStop(0.35,'#5c2e00');
+  govdeGrad.addColorStop(0.6,'#7a3e0a');
+  govdeGrad.addColorStop(1,'#2a1200');
+  ctx.fillStyle=govdeGrad;
+  ctx.beginPath();
+  ctx.roundRect(govdeX,y1,govdeG,y2-y1,4);
+  ctx.fill();
+
+  // Gövde dokusu
+  ctx.strokeStyle='rgba(0,0,0,0.2)';
+  ctx.lineWidth=1;
+  for(let i=0;i<3;i++){
+    ctx.beginPath();
+    ctx.moveTo(govdeX+govdeG*0.2+i*govdeG*0.25,y1);
+    ctx.lineTo(govdeX+govdeG*0.15+i*govdeG*0.25,y2);
+    ctx.stroke();
+  }
+
+  // Yaprak kümeleri
+  const yaprakY=ust?y2:y1;
+  const katmanlar=3;
+  for(let k=0;k<katmanlar;k++){
+    const yOffset=(ust?-1:1)*(k*22+15);
+    const genislik=BGENISLIK*(1.2-k*0.15);
+    
+    for(let i=0;i<6+k;i++){
+      const aci=(i/(6+k))*Math.PI*2;
+      const r=genislik*0.4*(0.7+Math.random()*0.3);
+      const lx=x+BGENISLIK/2+Math.cos(aci)*r*0.6;
+      const ly=yaprakY+yOffset+Math.sin(aci)*r*0.3;
+      
+      const yesil=`hsl(${105+k*10+i*3},${65+k*5}%,${20+k*5}%)`;
+      ctx.beginPath();
+      ctx.arc(lx,ly,genislik*0.22,0,Math.PI*2);
+      ctx.fillStyle=yesil;
+      ctx.fill();
+    }
+    
+    // Merkez yaprak
+    ctx.beginPath();
+    ctx.arc(x+BGENISLIK/2,yaprakY+yOffset,genislik*0.3,0,Math.PI*2);
+    ctx.fillStyle=`hsl(${115+k*8},70%,${25+k*4}%)`;
+    ctx.fill();
+    
+    // Yaprak parıltısı
+    ctx.beginPath();
+    ctx.arc(x+BGENISLIK/2-5,yaprakY+yOffset-5,genislik*0.12,0,Math.PI*2);
+    ctx.fillStyle='rgba(150,255,100,0.12)';
+    ctx.fill();
+  }
+}
 
 function baslat(){
   document.getElementById('menu').style.display='none';
   document.getElementById('oldu').style.display='none';
-  document.getElementById('skor').style.display='block';
+  document.getElementById('skor-wrap').style.display='block';
   pars={y:H/2,vy:0};
   borular=[];
   skor=0;
@@ -70,53 +314,42 @@ function baslat(){
 }
 
 document.getElementById('playBtn').addEventListener('click',baslat);
-document.getElementById('playBtn').addEventListener('touchend',function(e){e.preventDefault();baslat();});
+document.getElementById('playBtn').addEventListener('touchend',e=>{e.preventDefault();baslat();});
 document.getElementById('tekrarBtn').addEventListener('click',baslat);
-document.getElementById('tekrarBtn').addEventListener('touchend',function(e){e.preventDefault();baslat();});
+document.getElementById('tekrarBtn').addEventListener('touchend',e=>{e.preventDefault();baslat();});
 
 function zipla(){
   if(!aktif)return;
   ilkZiplama=true;
   pars.vy=ZIPLAMA;
 }
-
 canvas.addEventListener('click',zipla);
-canvas.addEventListener('touchstart',function(e){e.preventDefault();zipla();},{passive:false});
-document.addEventListener('keydown',function(e){if(e.code==='Space')zipla();});
+canvas.addEventListener('touchstart',e=>{e.preventDefault();zipla();},{passive:false});
+document.addEventListener('keydown',e=>{if(e.code==='Space')zipla();});
 
 function loop(){
   if(!aktif)return;
-
   const hiz=Math.min(2+skor*0.06,6.5);
-  const yerCekimi=ilkZiplama
-    ?Math.min(YER_NORMAL+skor*0.005,0.55)
-    :YER_YAVASH;
-
+  const yerCekimi=ilkZiplama?Math.min(YER_NORMAL+skor*0.005,0.55):YER_YAVASH;
   pars.vy+=yerCekimi;
   pars.y+=pars.vy;
 
-  // Boru ekle
   if(borular.length===0||borular[borular.length-1].x<W-W*0.6)boruEkle();
-
-  // Boruları güncelle
   for(let i=borular.length-1;i>=0;i--){
     borular[i].x-=hiz;
     if(!borular[i].gecildi&&borular[i].x+BGENISLIK<PARSX){
-      borular[i].gecildi=true;
-      skor++;
+      borular[i].gecildi=true;skor++;
       document.getElementById('skor').textContent=skor;
     }
     if(borular[i].x+BGENISLIK<0)borular.splice(i,1);
   }
 
-  // Çarpışma
   if(pars.y-PARSBOY/2<0||pars.y+PARSBOY/2>H-15){oldu();return;}
   for(const b of borular){
-    if(PARSX+PARSBOY/2-10>b.x&&PARSX-PARSBOY/2+10<b.x+BGENISLIK){
-      if(pars.y-PARSBOY/2+10<b.ust||pars.y+PARSBOY/2-10>b.alt){oldu();return;}
+    if(PARSX+PARSBOY/2-8>b.x&&PARSX-PARSBOY/2+8<b.x+BGENISLIK){
+      if(pars.y-PARSBOY/2+8<b.ust||pars.y+PARSBOY/2-8>b.alt){oldu();return;}
     }
   }
-
   ciz();
   raf=requestAnimationFrame(loop);
 }
@@ -130,60 +363,65 @@ function boruEkle(){
 function ciz(){
   // Arkaplan
   const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#0a1f10');
-  g.addColorStop(0.6,'#1a472a');
-  g.addColorStop(1,'#0d2b10');
+  g.addColorStop(0,'#061a0e');
+  g.addColorStop(0.4,'#0d2b18');
+  g.addColorStop(1,'#1a4a20');
   ctx.fillStyle=g;
   ctx.fillRect(0,0,W,H);
 
-  // Borular
+  // Işık efekti
+  const lg=ctx.createRadialGradient(W/2,H*0.3,0,W/2,H*0.3,W*0.6);
+  lg.addColorStop(0,'rgba(100,200,50,0.05)');
+  lg.addColorStop(1,'transparent');
+  ctx.fillStyle=lg;
+  ctx.fillRect(0,0,W,H);
+
+  // Ağaçlar
   for(const b of borular){
-    const gb=ctx.createLinearGradient(b.x,0,b.x+BGENISLIK,0);
-    gb.addColorStop(0,'#1a4a10');
-    gb.addColorStop(0.4,'#3a8a20');
-    gb.addColorStop(1,'#0d2b08');
-    ctx.fillStyle=gb;
-    ctx.fillRect(b.x,0,BGENISLIK,b.ust);
-    ctx.fillStyle='#4aaa28';
-    ctx.fillRect(b.x-10,b.ust-30,BGENISLIK+20,30);
-    ctx.fillStyle='#3a8a20';
-    ctx.fillRect(b.x-10,b.ust-35,BGENISLIK+20,8);
-    ctx.fillStyle=gb;
-    ctx.fillRect(b.x,b.alt,BGENISLIK,H-b.alt);
-    ctx.fillStyle='#4aaa28';
-    ctx.fillRect(b.x-10,b.alt,BGENISLIK+20,30);
-    ctx.fillStyle='#3a8a20';
-    ctx.fillRect(b.x-10,b.alt+22,BGENISLIK+20,8);
+    agacCiz(b.x,0,b.ust,true);
+    agacCiz(b.x,b.alt,H,false);
   }
 
   // Zemin
-  ctx.fillStyle='#2d6a18';
-  ctx.fillRect(0,H-15,W,15);
+  const zG=ctx.createLinearGradient(0,H-25,0,H);
+  zG.addColorStop(0,'#4acd20');
+  zG.addColorStop(0.3,'#2d8a10');
+  zG.addColorStop(1,'#1a5c0a');
+  ctx.fillStyle=zG;
+  ctx.fillRect(0,H-20,W,20);
+  ctx.fillStyle='#5aee28';
+  for(let i=0;i<W;i+=12){
+    ctx.fillRect(i,H-23,3,6);
+    ctx.fillRect(i+6,H-25,2,8);
+  }
 
   // Pars
-  ctx.save();
-  ctx.translate(PARSX,pars.y);
-  ctx.font=PARSBOY+'px serif';
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
-  ctx.fillText('🐆',0,0);
-  ctx.restore();
+  parssCiz(PARSX,pars.y,pars.vy);
 
-  // En yüksek
-  ctx.fillStyle='rgba(255,255,255,0.3)';
-  ctx.font='bold 14px Arial';
+  // En yüksek panel
+  ctx.fillStyle='rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.roundRect(W-95,8,87,26,8);
+  ctx.fill();
+  ctx.fillStyle='rgba(255,215,0,0.7)';
+  ctx.font='bold 13px Arial';
   ctx.textAlign='right';
-  ctx.fillText('EN YÜKSEK: '+enYuksek,W-10,25);
+  ctx.fillText('🏆 '+enYuksek,W-10,26);
 }
 
 function oldu(){
   aktif=false;
   cancelAnimationFrame(raf);
   if(skor>enYuksek)enYuksek=skor;
-  document.getElementById('skor').style.display='none';
-  document.getElementById('sonSkor').textContent='Skor: '+skor;
-  document.getElementById('enYuksekGoster').textContent='En Yüksek: '+enYuksek;
-  document.getElementById('oldu').style.display='flex';
+  document.body.classList.remove('sarsin');
+  void document.body.offsetWidth;
+  document.body.classList.add('sarsin');
+  ctx.fillStyle='rgba(255,0,0,0.25)';
+  ctx.fillRect(0,0,W,H);
+  document.getElementById('skor-wrap').style.display='none';
+  document.getElementById('sonSkor').textContent=skor+' PUAN';
+  document.getElementById('enYuksekGoster').textContent='🏆 En Yüksek: '+enYuksek;
+  setTimeout(()=>{document.getElementById('oldu').style.display='flex';},300);
 }
 </script>
 </body>
