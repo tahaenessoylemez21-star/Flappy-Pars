@@ -51,7 +51,9 @@ const PARSBOY=Math.floor(W*0.11);
 const PARSX=W*0.25;
 
 // Fizik sabitleri - kolay başlangıç
-const YER_CEKIMI=0.25;
+  
+const YER_CEKIMI_BASLANGIC=0.08;
+const YER_CEKIMI=0.28;
 const ZIPLAMA=-H*0.007;
 
 function baslat(){
@@ -92,7 +94,10 @@ function loop(){
   // İlk zıplamadan önce düz git
   if(ilkZiplama){
     pars.vy+=yerCekimi;
-    pars.y+=pars.vy;
+  }else{
+    pars.vy+=YER_CEKIMI_BASLANGIC;
+  }
+  pars.y+=pars.vy;
   }
 
   // Boru ekle
