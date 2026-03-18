@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🐆 Flappy Pars</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a0a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:'Arial',sans-serif;overflow:hidden;user-select:none}
+canvas{border-radius:16px;box-shadow:0 0 40px #00000088;max-width:100vw;max-height:100vh}
+#ui{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+#skor{position:fixed;top:20px;left:50%;transform:translateX(-50%);font-size:48px;font-weight:bold;color:white;text-shadow:0 0 20px #ffd700,2px 2px 0 #000;z-index:10;pointer-events:none}
+#menu{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#0d1b2a,#1a472a);z-index:20}
+#menu h1{font-size:52px;color:#ffd700;text-shadow:0 0 30px #ffd700;margin-bottom:10px;animation:pulse 2s infinite}
+#menu .sub{font-size:18px;color:#90ee90;margin-bottom:40px;letter-spacing:2px}
+#menu .pars{font-size:80px;animation:bounce 1s infinite;margin-bottom:20px}
+.play-btn{background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;padding:18px 50px;border-radius:50px;font-size:24px;font-weight:bold;color:#1a0a2e;cursor:pointer;box-shadow:0 8px 25px #ffd70066;transform:translateY(0);transition:all 0.2s;pointer-events:all}
+.play-btn:active{transform:translateY(4px);box-shadow:0 4px 15px #ffd70066}
+#oldu{position:fixed;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;align-items:center;justify-content:center;background:#00000099;z-index:20;backdrop-filter:blur(5px)}
+#oldu h2{font-size:48px;color:#ff4444;text-shadow:0 0 20px #ff4444;margin-bottom:10px}
+#oldu .skor-goster{font-size:28px;color:#ffd700;margin-bottom:5px}
+#oldu .en-yuksek{font-size:18px;color:#90ee90;margin-bottom:30px}
+#hiz-goster{position:fixed;top:20px;right:20px;font-size:14px;color:#ffffff88;z-index:10}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+</style>
+</head>
+<body>
+<canvas id="oyun"></canvas>
+<div id="skor" style="display:none">0</div>
+<div id="hiz-goster"></div>
+
+<div id="menu">
+<div class="pars">🐆</div>
+<h1>FLAPPY PARS</h1>
+<p class="sub">ORMAN MACERASI</p>
+<button class="play-btn" onclick="oyunuBaslat()">▶ OYNA</button>
+</div>
+
+<div id="oldu">
+<h2>💀 ÇARPTIN!</h2>
+<div class="skor-goster" id="son-skor">Skor: 0</div>
+<div class="en-yuksek" id="en-yuksek-goster">En Yüksek: 0</div>
+<button class="play-btn" onclick="oyunuBaslat()">🔄 TEKRAR OYNA</button>
+</div>
+
+<script>
+const canvas=document.getElementById('oyun');
+const ctx=canvas.getContext('2d');
+const W=canvas.width=Math.min(400,window.innerWidth);
+const H=canvas.height=Math.min(600,window.innerHeight);
+
+let pars,borular,skor,enYuksek=0,oyunAktif=false,animFrame;
+let hiz,yerCekimi,ziplamGuc;
+
+const BORU_GENISLIK=60;
+const BORU_ARALIK=160;
+const PARS_X=80;
+const PARS_BOYUT=40;
+
+function oyunuBaslat(){
+document.getElementById('menu').style.display='none';
+document.getElementById('oldu').style.display='none';
+document.getElementById('skor').style.display='block';
+pars={y:H/2,vy:0,rotation:0};
+borular=[];
+skor=0;
+hiz=2.5;
+yerCekimi=0.35;
+ziplamGuc=-7;
+oyunAktif=true;
+if(animFrame)cancelAnimationFrame(animFrame);
+document.getElementById('skor').textContent='0';
+oyunDongusu();
+}
+
+function zipla(){
+if(!oyunAktif)return;
+pars.vy=ziplamGuc;
+}
+
+document.addEventListener('click',zipla);
+document.addEventListener('touchstart',e=>{e.preventDefault();zipla();},{passive:false});
+document.addEventListener('keydown',e=>{if(e.code==='Space')zipla();});
+
+function boruEkle(){
+const minY=80;
+const maxY=H-BORU_ARALIK-80;
+const ust=Math.random()*(maxY-minY)+minY;
+borular.push({x:W,ust:ust,alt:ust+BORU_ARALIK,gecildi:false});
+}
+
+function oyunDongusu(){
+if(!oyunAktif)return;
+guncelle();
+ciz();
+animFrame=requestAnimationFrame(oyunDongusu);
+}
+
+function guncelle(){
+// Hız artışı
+hiz=2.5+skor*0.08;
+if(hiz>8)hiz=8;
+yerCekimi=0.35+skor*0.003;
+if(yerCekimi>0.6)yerCekimi=0.6;
+ziplamGuc=-7-skor*0.04;
+if(ziplamGuc<-10)ziplamGuc=-10;
+
+document.getElementById('hiz-goster').textContent='Hız: '+hiz.toFixed(1)+'x';
+
+// Pars fiziği
+pars.vy+=yerCekimi;
+pars.y+=pars.vy;
+pars.rotation=Math.min(Math.max(pars.vy*3,-30),90);
+
+// Boru ekle
+if(borular.length===0||borular[borular.length-1].x<W-220){
+boruEkle();
+}
+
+// Boruları güncelle
+for(let i=borular.length-1;i>=0;i--){
+borular[i].x-=hiz;
+if(!borular[i].gecildi&&borular[i].x+BORU_GENISLIK<PARS_X){
+borular[i].gecildi=true;
+skor++;
+document.getElementById('skor').textContent=skor;
+}
+if(borular[i].x+BORU_GENISLIK<0)borular.splice(i,1);
+}
+
+// Çarpışma kontrolü
+if(pars.y-PARS_BOYUT/2<0||pars.y+PARS_BOYUT/2>H){
+oldu();return;
+}
+
+for(const b of borular){
+if(PARS_X+PARS_BOYUT/2-10>b.x&&PARS_X-PARS_BOYUT/2+10<b.x+BORU_GENISLIK){
+if(pars.y-PARS_BOYUT/2+5<b.ust||pars.y+PARS_BOYUT/2-5>b.alt){
+oldu();return;
+}
+}
+}
+}
+
+function ciz(){
+// Arkaplan - orman
+const grad=ctx.createLinearGradient(0,0,0,H);
+grad.addColorStop(0,'#0d2b1a');
+grad.addColorStop(0.7,'#1a472a');
+grad.addColorStop(1,'#2d5a1b');
+ctx.fillStyle=grad;
+ctx.fillRect(0,0,W,H);
+
+// Bulutlar/yapraklar arkaplan
+ctx.fillStyle='#ffffff08';
+for(let i=0;i<5;i++){
+ctx.beginPath();
+ctx.arc(50+i*80,50+i*20,30,0,Math.PI*2);
+ctx.fill();
+}
+
+// Zemin
+ctx.fillStyle='#3d7a2a';
+ctx.fillRect(0,H-20,W,20);
+ctx.fillStyle='#2d5a1b';
+ctx.fillRect(0,H-25,W,8);
+
+// Borular (ağaç gövdeleri)
+for(const b of borular){
+// Üst boru
+const gradBoru=ctx.createLinearGradient(b.x,0,b.x+BORU_GENISLIK,0);
+gradBoru.addColorStop(0,'#2d5a1b');
+gradBoru.addColorStop(0.3,'#4a8a2a');
+gradBoru.addColorStop(1,'#1a3a10');
+ctx.fillStyle=gradBoru;
+ctx.fillRect(b.x,0,BORU_GENISLIK,b.ust);
+
+// Üst boru başlık (yaprak)
+ctx.fillStyle='#5aaa3a';
+ctx.fillRect(b.x-8,b.ust-25,BORU_GENISLIK+16,25);
+ctx.fillStyle='#4a8a2a';
+ctx.fillRect(b.x-8,b.ust-28,BORU_GENISLIK+16,6);
+
+// Alt boru
+ctx.fillStyle=gradBoru;
+ctx.fillRect(b.x,b.alt,BORU_GENISLIK,H-b.alt);
+
+// Alt boru başlık (yaprak)
+ctx.fillStyle='#5aaa3a';
+ctx.fillRect(b.x-8,b.alt,BORU_GENISLIK+16,25);
+ctx.fillStyle='#4a8a2a';
+ctx.fillRect(b.x-8,b.alt+22,BORU_GENISLIK+16,6);
+}
+
+// Pars karakteri
+ctx.save();
+ctx.translate(PARS_X,pars.y);
+ctx.rotate(pars.rotation*Math.PI/180);
+ctx.font=PARS_BOYUT+'px Arial';
+ctx.textAlign='center';
+ctx.textBaseline='middle';
+ctx.fillText('🐆',0,0);
+ctx.restore();
+
+// Skor animasyonu
+ctx.fillStyle='#ffffff22';
+ctx.font='bold 16px Arial';
+ctx.textAlign='right';
+ctx.fillText('EN YÜKSEK: '+enYuksek,W-10,20);
+}
+
+function oldu(){
+oyunAktif=false;
+cancelAnimationFrame(animFrame);
+if(skor>enYuksek)enYuksek=skor;
+document.getElementById('skor').style.display='none';
+document.getElementById('son-skor').textContent='Skor: '+skor;
+document.getElementById('en-yuksek-goster').textContent='En Yüksek: '+enYuksek;
+document.getElementById('oldu').style.display='flex';
+document.getElementById('hiz-goster').textContent='';
+}
+</script>
+</body>
+</html>
