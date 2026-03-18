@@ -50,11 +50,10 @@ const ARALIK=Math.floor(H*0.32);
 const PARSBOY=Math.floor(W*0.11);
 const PARSX=W*0.25;
 
-// Fizik sabitleri - kolay başlangıç
-  
-const YER_CEKIMI_BASLANGIC=0.08;
-const YER_CEKIMI=0.28;
-const ZIPLAMA=-H*0.007;
+// Fizik
+const YER_YAVASH=0.06;   // ilk zıplamadan önce yavaş düşüş
+const YER_NORMAL=0.28;   // normal yerçekimi
+const ZIPLAMA=-H*0.008;  // zıplama gücü
 
 function baslat(){
   document.getElementById('menu').style.display='none';
@@ -89,16 +88,12 @@ function loop(){
   if(!aktif)return;
 
   const hiz=Math.min(2+skor*0.06,6.5);
-  const yerCekimi=Math.min(YER_CEKIMI+skor*0.005,0.55);
+  const yerCekimi=ilkZiplama
+    ?Math.min(YER_NORMAL+skor*0.005,0.55)
+    :YER_YAVASH;
 
-  // İlk zıplamadan önce düz git
-  if(ilkZiplama){
-    pars.vy+=yerCekimi;
-  }else{
-    pars.vy+=YER_CEKIMI_BASLANGIC;
-  }
+  pars.vy+=yerCekimi;
   pars.y+=pars.vy;
-  }
 
   // Boru ekle
   if(borular.length===0||borular[borular.length-1].x<W-W*0.6)boruEkle();
@@ -148,13 +143,11 @@ function ciz(){
     gb.addColorStop(0.4,'#3a8a20');
     gb.addColorStop(1,'#0d2b08');
     ctx.fillStyle=gb;
-    // Üst boru
     ctx.fillRect(b.x,0,BGENISLIK,b.ust);
     ctx.fillStyle='#4aaa28';
     ctx.fillRect(b.x-10,b.ust-30,BGENISLIK+20,30);
     ctx.fillStyle='#3a8a20';
     ctx.fillRect(b.x-10,b.ust-35,BGENISLIK+20,8);
-    // Alt boru
     ctx.fillStyle=gb;
     ctx.fillRect(b.x,b.alt,BGENISLIK,H-b.alt);
     ctx.fillStyle='#4aaa28';
@@ -167,7 +160,7 @@ function ciz(){
   ctx.fillStyle='#2d6a18';
   ctx.fillRect(0,H-15,W,15);
 
-  // Pars - HİÇ DÖNME!
+  // Pars
   ctx.save();
   ctx.translate(PARSX,pars.y);
   ctx.font=PARSBOY+'px serif';
@@ -176,7 +169,7 @@ function ciz(){
   ctx.fillText('🐆',0,0);
   ctx.restore();
 
-  // En yüksek skor
+  // En yüksek
   ctx.fillStyle='rgba(255,255,255,0.3)';
   ctx.font='bold 14px Arial';
   ctx.textAlign='right';
