@@ -22,25 +22,20 @@ canvas{display:block;touch-action:none}
 </style>
 </head>
 <body>
-
 <div id="menu">
   <div class="pars">🐆</div>
   <h1>FLAPPY PARS</h1>
   <p class="sub">ORMAN MACERASI</p>
   <button class="play-btn" id="playBtn">▶ OYNA</button>
 </div>
-
 <div id="skor" style="display:none">0</div>
-
 <div id="oldu">
   <h2>💀 ÇARPTIN!</h2>
   <div class="s1" id="sonSkor">Skor: 0</div>
   <div class="s2" id="enYuksekGoster">En Yüksek: 0</div>
   <button class="play-btn" id="tekrarBtn">🔄 TEKRAR</button>
 </div>
-
 <canvas id="c"></canvas>
-
 <script>
 const canvas=document.getElementById('c');
 const ctx=canvas.getContext('2d');
@@ -48,7 +43,16 @@ canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
 const W=canvas.width,H=canvas.height;
 
-let pars,borular,skor,enYuksek=0,aktif=false,raf;
+let pars,borular,skor,enYuksek=0,aktif=false,raf,ilkZiplama=false;
+
+const BGENISLIK=Math.floor(W*0.15);
+const ARALIK=Math.floor(H*0.32);
+const PARSBOY=Math.floor(W*0.11);
+const PARSX=W*0.25;
+
+// Fizik sabitleri - kolay başlangıç
+const YER_CEKIMI=0.25;
+const ZIPLAMA=-H*0.013;
 
 function baslat(){
   document.getElementById('menu').style.display='none';
@@ -58,6 +62,7 @@ function baslat(){
   borular=[];
   skor=0;
   aktif=true;
+  ilkZiplama=false;
   document.getElementById('skor').textContent='0';
   if(raf)cancelAnimationFrame(raf);
   loop();
@@ -70,31 +75,33 @@ document.getElementById('tekrarBtn').addEventListener('touchend',function(e){e.p
 
 function zipla(){
   if(!aktif)return;
-  pars.vy=-H*0.018;
+  ilkZiplama=true;
+  pars.vy=ZIPLAMA;
 }
 
 canvas.addEventListener('click',zipla);
 canvas.addEventListener('touchstart',function(e){e.preventDefault();zipla();},{passive:false});
 document.addEventListener('keydown',function(e){if(e.code==='Space')zipla();});
 
-const BGENISLIK=Math.floor(W*0.15);
-const ARALIK=Math.floor(H*0.28);
-const PARSBOY=Math.floor(W*0.12);
-
 function loop(){
   if(!aktif)return;
 
-  const hiz=2+skor*0.07>7?7:2+skor*0.07;
-  const yer=0.6+skor*0.008>1.2?1.2:0.6+skor*0.008;
+  const hiz=Math.min(2+skor*0.06,6.5);
+  const yerCekimi=Math.min(YER_CEKIMI+skor*0.005,0.55);
 
-  pars.vy+=yer;
-  pars.y+=pars.vy;
+  // İlk zıplamadan önce düz git
+  if(ilkZiplama){
+    pars.vy+=yerCekimi;
+    pars.y+=pars.vy;
+  }
 
-  if(borular.length===0||borular[borular.length-1].x<W-W*0.55)boruEkle();
+  // Boru ekle
+  if(borular.length===0||borular[borular.length-1].x<W-W*0.6)boruEkle();
 
+  // Boruları güncelle
   for(let i=borular.length-1;i>=0;i--){
     borular[i].x-=hiz;
-    if(!borular[i].gecildi&&borular[i].x+BGENISLIK<W*0.25){
+    if(!borular[i].gecildi&&borular[i].x+BGENISLIK<PARSX){
       borular[i].gecildi=true;
       skor++;
       document.getElementById('skor').textContent=skor;
@@ -102,25 +109,25 @@ function loop(){
     if(borular[i].x+BGENISLIK<0)borular.splice(i,1);
   }
 
-  const px=W*0.25,py=pars.y;
-  if(py-PARSBOY/2<0||py+PARSBOY/2>H){oldu();return;}
+  // Çarpışma
+  if(pars.y-PARSBOY/2<0||pars.y+PARSBOY/2>H-15){oldu();return;}
   for(const b of borular){
-    if(px+PARSBOY/2-8>b.x&&px-PARSBOY/2+8<b.x+BGENISLIK){
-      if(py-PARSBOY/2+8<b.ust||py+PARSBOY/2-8>b.alt){oldu();return;}
+    if(PARSX+PARSBOY/2-10>b.x&&PARSX-PARSBOY/2+10<b.x+BGENISLIK){
+      if(pars.y-PARSBOY/2+10<b.ust||pars.y+PARSBOY/2-10>b.alt){oldu();return;}
     }
   }
 
-  ciz(hiz);
+  ciz();
   raf=requestAnimationFrame(loop);
 }
 
 function boruEkle(){
   const min=H*0.15,max=H-ARALIK-H*0.15;
   const ust=Math.random()*(max-min)+min;
-  borular.push({x:W,ust:ust,alt:ust+ARALIK,gecildi:false});
+  borular.push({x:W+BGENISLIK,ust:ust,alt:ust+ARALIK,gecildi:false});
 }
 
-function ciz(hiz){
+function ciz(){
   // Arkaplan
   const g=ctx.createLinearGradient(0,0,0,H);
   g.addColorStop(0,'#0a1f10');
@@ -131,19 +138,18 @@ function ciz(hiz){
 
   // Borular
   for(const b of borular){
-    // Üst
     const gb=ctx.createLinearGradient(b.x,0,b.x+BGENISLIK,0);
     gb.addColorStop(0,'#1a4a10');
     gb.addColorStop(0.4,'#3a8a20');
     gb.addColorStop(1,'#0d2b08');
     ctx.fillStyle=gb;
+    // Üst boru
     ctx.fillRect(b.x,0,BGENISLIK,b.ust);
     ctx.fillStyle='#4aaa28';
     ctx.fillRect(b.x-10,b.ust-30,BGENISLIK+20,30);
     ctx.fillStyle='#3a8a20';
     ctx.fillRect(b.x-10,b.ust-35,BGENISLIK+20,8);
-
-    // Alt
+    // Alt boru
     ctx.fillStyle=gb;
     ctx.fillRect(b.x,b.alt,BGENISLIK,H-b.alt);
     ctx.fillStyle='#4aaa28';
@@ -156,18 +162,16 @@ function ciz(hiz){
   ctx.fillStyle='#2d6a18';
   ctx.fillRect(0,H-15,W,15);
 
-  // Pars
+  // Pars - HİÇ DÖNME!
   ctx.save();
-  ctx.translate(W*0.25,pars.y);
-  const rot=Math.min(Math.max(pars.vy*2,-25),80)*Math.PI/180;
-  ctx.rotate(rot);
+  ctx.translate(PARSX,pars.y);
   ctx.font=PARSBOY+'px serif';
   ctx.textAlign='center';
   ctx.textBaseline='middle';
   ctx.fillText('🐆',0,0);
   ctx.restore();
 
-  // En yüksek
+  // En yüksek skor
   ctx.fillStyle='rgba(255,255,255,0.3)';
   ctx.font='bold 14px Arial';
   ctx.textAlign='right';
