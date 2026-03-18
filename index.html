@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>🐆 Flappy Pars</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a1f10;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;overflow:hidden;user-select:none;-webkit-user-select:none;font-family:Arial,sans-serif}
 canvas{display:block;touch-action:none;position:fixed;top:0;left:0;z-index:0}
 .ekran{position:fixed;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10}
-
-/* MENU */
 #menu{background:linear-gradient(180deg,#061a0e 0%,#0d2b18 50%,#1a472a 100%)}
 .menu-bg{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden}
 .yaprak{position:absolute;font-size:24px;animation:fall linear infinite;opacity:0.3}
@@ -18,13 +18,10 @@ canvas{display:block;touch-action:none;position:fixed;top:0;left:0;z-index:0}
 .menu-icerik{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center}
 .pars-icon{font-size:80px;animation:bounce 1s ease-in-out infinite;filter:drop-shadow(0 0 20px #ffd70088);margin-bottom:10px}
 @keyframes bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.05)}}
-.oyun-adi{font-size:46px;color:#ffd700;text-shadow:0 0 30px #ffd700,0 0 60px #ffd70044,3px 3px 0 #8b6914;font-family:Arial Black,sans-serif;letter-spacing:3px;margin-bottom:4px}
-.oyun-alt{font-size:14px;color:#90ee90;letter-spacing:4px;margin-bottom:35px;text-shadow:0 0 10px #90ee9066}
+.oyun-adi{font-size:46px;color:#ffd700;text-shadow:0 0 30px #ffd700,3px 3px 0 #8b6914;font-family:Arial Black,sans-serif;letter-spacing:3px;margin-bottom:4px}
+.oyun-alt{font-size:14px;color:#90ee90;letter-spacing:4px;margin-bottom:35px}
 .menu-btn{background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;padding:16px 50px;border-radius:50px;font-size:22px;font-weight:bold;color:#1a0a2e;cursor:pointer;font-family:Arial Black,sans-serif;box-shadow:0 6px 25px rgba(255,215,0,0.5);letter-spacing:2px;margin:6px;-webkit-tap-highlight-color:transparent;width:240px}
 .menu-btn.ikincil{background:linear-gradient(135deg,#4ecdc4,#2ea89f);color:white;font-size:18px;padding:13px 40px}
-.menu-btn.ucuncul{background:linear-gradient(135deg,#a855f7,#7c3aed);color:white;font-size:18px;padding:13px 40px}
-
-/* LIDERLIK */
 #liderlik{background:rgba(0,0,0,0.95);backdrop-filter:blur(10px)}
 .lider-baslik{font-size:28px;color:#ffd700;font-family:Arial Black,sans-serif;margin-bottom:20px;text-shadow:0 0 20px #ffd700}
 .lider-liste{width:90%;max-width:380px;max-height:60vh;overflow-y:auto}
@@ -36,44 +33,33 @@ canvas{display:block;touch-action:none;position:fixed;top:0;left:0;z-index:0}
 .lider-isim{flex:1;font-size:16px;color:white;font-weight:bold}
 .lider-skor{font-size:20px;color:#ffd700;font-weight:bold;font-family:Arial Black,sans-serif}
 .kapat-btn{margin-top:20px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);color:white;padding:10px 30px;border-radius:25px;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-
-/* ISIM GIRISI */
 #isim-giris{background:rgba(0,0,0,0.92);backdrop-filter:blur(10px)}
 .isim-baslik{font-size:24px;color:#ffd700;font-family:Arial Black,sans-serif;margin-bottom:8px}
 .isim-alt{font-size:14px;color:#aaa;margin-bottom:20px}
 .isim-input{width:250px;padding:14px 20px;border-radius:30px;border:2px solid #ffd70066;background:rgba(255,255,255,0.1);color:white;font-size:20px;text-align:center;outline:none;font-family:Arial Black,sans-serif;margin-bottom:15px}
 .isim-input::placeholder{color:#666}
-.isim-input:focus{border-color:#ffd700;box-shadow:0 0 15px #ffd70044}
-
-/* OYUN UI */
+.isim-input:focus{border-color:#ffd700}
 #oyun-ui{background:transparent;pointer-events:none}
 #skor-wrap{position:fixed;top:20px;left:50%;transform:translateX(-50%);text-align:center;z-index:15;pointer-events:none}
 #skor{font-size:58px;font-weight:bold;color:white;font-family:Arial Black,sans-serif;text-shadow:0 4px 0 #00000099,0 0 30px #ffd70088;line-height:1}
 #skor-label{font-size:11px;color:#ffd70088;letter-spacing:3px;margin-top:-4px}
 #en-iyi{position:fixed;top:20px;right:15px;background:rgba(0,0,0,0.4);border-radius:10px;padding:5px 10px;z-index:15;pointer-events:none}
-#en-iyi-text{font-size:12px;color:#ffd700aa;font-family:Arial,sans-serif}
-
-/* OLDU */
+#en-iyi-text{font-size:12px;color:#ffd700aa}
 #oldu{background:rgba(0,0,0,0.88);backdrop-filter:blur(8px)}
-.oldu-baslik{font-size:42px;color:#ff4444;font-family:Arial Black,sans-serif;margin-bottom:5px;text-shadow:0 0 20px #ff444488}
-.oldu-skor{font-size:64px;color:#ffd700;font-family:Arial Black,sans-serif;text-shadow:0 0 25px #ffd70088;line-height:1}
+.oldu-baslik{font-size:42px;color:#ff4444;font-family:Arial Black,sans-serif;margin-bottom:5px}
+.oldu-skor{font-size:64px;color:#ffd700;font-family:Arial Black,sans-serif;line-height:1}
 .oldu-label{font-size:12px;color:#ffd70088;letter-spacing:3px;margin-bottom:5px}
 .oldu-en-iyi{font-size:16px;color:#90ee90;margin-bottom:25px}
 .oldu-kayit{font-size:13px;color:#4ecdc4;margin-bottom:15px;min-height:18px}
-
-/* MÜZİK BUTONU */
 #muzik-btn{position:fixed;bottom:20px;right:20px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);color:white;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;z-index:20;-webkit-tap-highlight-color:transparent}
-
 @keyframes sarsinti{0%,100%{transform:translate(0,0)}20%{transform:translate(-8px,6px)}40%{transform:translate(8px,-6px)}60%{transform:translate(-5px,4px)}80%{transform:translate(5px,-4px)}}
 .sarsin{animation:sarsinti 0.4s ease}
 </style>
 </head>
 <body>
-
 <canvas id="c"></canvas>
-<button id="muzik-btn">🔊</button>
+<button id="muzik-btn">🔇</button>
 
-<!-- MENU -->
 <div id="menu" class="ekran" style="display:flex">
   <div class="menu-bg" id="yaprak-bg"></div>
   <div class="menu-icerik">
@@ -85,37 +71,29 @@ canvas{display:block;touch-action:none;position:fixed;top:0;left:0;z-index:0}
   </div>
 </div>
 
-<!-- İSİM GİRİŞİ -->
 <div id="isim-giris" class="ekran">
   <div style="font-size:50px;margin-bottom:10px">🐆</div>
   <div class="isim-baslik">OYUNCU ADIN?</div>
-  <div class="isim-alt">Skoların liderlik tablosuna eklenecek!</div>
+  <div class="isim-alt">Skorun liderlik tablosuna eklenecek!</div>
   <input class="isim-input" id="isim-input" placeholder="Adını yaz..." maxlength="15"/>
   <button class="menu-btn" id="basla-btn">🚀 BAŞLA</button>
   <button class="kapat-btn" id="isimsiz-btn">İsimsiz Oyna</button>
 </div>
 
-<!-- LİDERLİK TABLOSU -->
 <div id="liderlik" class="ekran">
   <div class="lider-baslik">🏆 LİDERLİK TABLOSU</div>
-  <div class="lider-liste" id="lider-liste">
-    <div style="color:#666;text-align:center;padding:20px">Yükleniyor...</div>
-  </div>
+  <div class="lider-liste" id="lider-liste"><div style="color:#666;text-align:center;padding:20px">Yükleniyor...</div></div>
   <button class="kapat-btn" id="lider-kapat">✕ Kapat</button>
 </div>
 
-<!-- OYUN UI -->
 <div id="oyun-ui" class="ekran">
   <div id="skor-wrap">
     <div id="skor">0</div>
     <div id="skor-label">SKOR</div>
   </div>
-  <div id="en-iyi">
-    <div id="en-iyi-text">🏆 0</div>
-  </div>
+  <div id="en-iyi"><div id="en-iyi-text">🏆 0</div></div>
 </div>
 
-<!-- OYUN BİTTİ -->
 <div id="oldu" class="ekran">
   <div class="oldu-baslik">💀 ÇARPTIN!</div>
   <div class="oldu-label">SKOR</div>
@@ -126,10 +104,8 @@ canvas{display:block;touch-action:none;position:fixed;top:0;left:0;z-index:0}
   <button class="menu-btn ikincil" id="menu-don-btn">🏠 MENÜ</button>
 </div>
 
-<script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import{getDatabase,ref,set,get,query,orderByChild,limitToLast}from"https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
-
+<script>
+// Firebase başlat
 const firebaseConfig={
   apiKey:"AIzaSyBLwHbX1MwJEzyJ71GRtLkcChkgatFAgS0",
   authDomain:"flappy-pars.firebaseapp.com",
@@ -139,9 +115,8 @@ const firebaseConfig={
   messagingSenderId:"995587188702",
   appId:"1:995587188702:web:e0042cb45d617b47ef9f4f"
 };
-
-const firebaseApp=initializeApp(firebaseConfig);
-const db=getDatabase(firebaseApp);
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
 
 // Canvas
 const canvas=document.getElementById('c');
@@ -150,7 +125,6 @@ canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
 const W=canvas.width,H=canvas.height;
 
-// Oyun değişkenleri
 let pars,borular,skor,enYuksek=0,aktif=false,raf,ilkZiplama=false;
 let oyuncuIsim='';
 
@@ -162,64 +136,57 @@ const YER_YAVASH=0.06;
 const YER_NORMAL=0.28;
 const ZIPLAMA=-H*0.008;
 
-// MÜZİK
+// MÜZİK - Daha iyi melodi
 const AudioCtx=window.AudioContext||window.webkitAudioContext;
-let audioCtx=null;
-let muzikAktif=false;
-let muzikInterval=null;
+let audioCtx=null,muzikAktif=false,melodiTimeout=null;
+let melodiIdx=0;
 
 const melodi=[
-  [523,0.15],[659,0.15],[784,0.15],[1047,0.3],
-  [784,0.15],[659,0.15],[523,0.3],
-  [440,0.15],[523,0.15],[659,0.15],[880,0.3],
-  [659,0.15],[523,0.15],[440,0.3],
-  [392,0.15],[494,0.15],[587,0.15],[784,0.3],
-  [587,0.15],[494,0.15],[392,0.3],
-  [349,0.15],[440,0.15],[523,0.15],[698,0.3],
-  [523,0.15],[440,0.15],[349,0.3],
+  [659,150],[523,150],[587,150],[659,300],
+  [698,150],[659,150],[587,150],[523,300],
+  [440,150],[523,150],[587,150],[659,300],
+  [587,150],[523,150],[440,150],[392,300],
+  [523,150],[659,150],[784,150],[880,300],
+  [784,150],[659,150],[523,150],[440,300],
+  [392,150],[494,150],[659,150],[784,300],
+  [659,150],[523,150],[440,150],[392,300],
 ];
 
-let melodiIndex=0;
 function notaCal(frekans,sure){
-  if(!audioCtx)return;
+  if(!audioCtx||!muzikAktif)return;
   const osc=audioCtx.createOscillator();
   const gain=audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.frequency.value=frekans;
-  osc.type='square';
-  gain.gain.setValueAtTime(0.08,audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+sure*0.9);
-  osc.start();
-  osc.stop(audioCtx.currentTime+sure);
+  const osc2=audioCtx.createOscillator();
+  const gain2=audioCtx.createGain();
+  osc.connect(gain);gain.connect(audioCtx.destination);
+  osc2.connect(gain2);gain2.connect(audioCtx.destination);
+  osc.frequency.value=frekans;osc.type='sine';
+  osc2.frequency.value=frekans*2;osc2.type='sine';
+  gain.gain.setValueAtTime(0.12,audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+sure/1000*0.85);
+  gain2.gain.setValueAtTime(0.04,audioCtx.currentTime);
+  gain2.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+sure/1000*0.6);
+  osc.start();osc.stop(audioCtx.currentTime+sure/1000);
+  osc2.start();osc2.stop(audioCtx.currentTime+sure/1000);
 }
 
-function muzikBaslat(){
-  if(!audioCtx)audioCtx=new AudioCtx();
-  if(muzikInterval)clearInterval(muzikInterval);
-  melodiIndex=0;
-  function sonrakiNota(){
-    if(!muzikAktif)return;
-    const [frekans,sure]=melodi[melodiIndex%melodi.length];
-    notaCal(frekans,sure);
-    melodiIndex++;
-    setTimeout(sonrakiNota,sure*1000+30);
-  }
-  sonrakiNota();
-}
-
-function muzikDurdur(){
-  if(muzikInterval)clearInterval(muzikInterval);
+function muzikDongusu(){
+  if(!muzikAktif)return;
+  const [frekans,sure]=melodi[melodiIdx%melodi.length];
+  notaCal(frekans,sure);
+  melodiIdx++;
+  melodiTimeout=setTimeout(muzikDongusu,sure+20);
 }
 
 document.getElementById('muzik-btn').addEventListener('click',()=>{
   if(!audioCtx)audioCtx=new AudioCtx();
   muzikAktif=!muzikAktif;
   document.getElementById('muzik-btn').textContent=muzikAktif?'🔊':'🔇';
-  if(muzikAktif)muzikBaslat();
+  if(muzikAktif){melodiIdx=0;muzikDongusu();}
+  else if(melodiTimeout)clearTimeout(melodiTimeout);
 });
 
-// EKRAN YÖNETİMİ
+// EKRAN
 function goster(id){
   ['menu','isim-giris','liderlik','oyun-ui','oldu'].forEach(x=>{
     document.getElementById(x).style.display='none';
@@ -227,7 +194,7 @@ function goster(id){
   document.getElementById(id).style.display='flex';
 }
 
-// YAPRAKLAR animasyonu
+// YAPRAKLAR
 function yapraklariOlustur(){
   const bg=document.getElementById('yaprak-bg');
   const emojiler=['🍃','🌿','🍀','🌱'];
@@ -247,49 +214,32 @@ yapraklariOlustur();
 // BUTONLAR
 document.getElementById('oyna-btn').addEventListener('click',()=>{
   goster('isim-giris');
-  document.getElementById('isim-input').focus();
+  setTimeout(()=>document.getElementById('isim-input').focus(),300);
 });
-
 document.getElementById('basla-btn').addEventListener('click',()=>{
-  const isim=document.getElementById('isim-input').value.trim();
-  oyuncuIsim=isim||'Anonim';
+  oyuncuIsim=document.getElementById('isim-input').value.trim()||'Anonim';
   oyunuBaslat();
 });
-
 document.getElementById('isimsiz-btn').addEventListener('click',()=>{
-  oyuncuIsim='';
-  oyunuBaslat();
+  oyuncuIsim='';oyunuBaslat();
 });
-
 document.getElementById('isim-input').addEventListener('keypress',e=>{
-  if(e.key==='Enter'){
-    const isim=document.getElementById('isim-input').value.trim();
-    oyuncuIsim=isim||'Anonim';
-    oyunuBaslat();
-  }
+  if(e.key==='Enter'){oyuncuIsim=document.getElementById('isim-input').value.trim()||'Anonim';oyunuBaslat();}
 });
-
 document.getElementById('tekrar-btn').addEventListener('click',()=>oyunuBaslat());
 document.getElementById('menu-don-btn').addEventListener('click',()=>{
-  aktif=false;
-  if(raf)cancelAnimationFrame(raf);
-  goster('menu');
+  aktif=false;if(raf)cancelAnimationFrame(raf);goster('menu');
 });
-
 document.getElementById('lider-btn').addEventListener('click',()=>{
-  goster('liderlik');
-  liderlikYukle();
+  goster('liderlik');liderlikYukle();
 });
-
 document.getElementById('lider-kapat').addEventListener('click',()=>goster('menu'));
 
 // LİDERLİK
-async function liderlikYukle(){
+function liderlikYukle(){
   const liste=document.getElementById('lider-liste');
   liste.innerHTML='<div style="color:#666;text-align:center;padding:20px">⏳ Yükleniyor...</div>';
-  try{
-    const q=query(ref(db,'skorlar'),orderByChild('skor'),limitToLast(10));
-    const snap=await get(q);
+  db.ref('skorlar').orderByChild('skor').limitToLast(10).once('value').then(snap=>{
     if(!snap.exists()){
       liste.innerHTML='<div style="color:#666;text-align:center;padding:20px">Henüz skor yok!<br>İlk sen ol! 🏆</div>';
       return;
@@ -306,150 +256,99 @@ async function liderlikYukle(){
         <div class="lider-skor">${s.skor}</div>
       </div>
     `).join('');
-  }catch(e){
+  }).catch(()=>{
     liste.innerHTML='<div style="color:#f66;text-align:center;padding:20px">Bağlantı hatası!</div>';
-  }
+  });
 }
 
-async function skorKaydet(isim,yeniSkor){
-  if(!isim||isim==='')return;
-  try{
-    const skorRef=ref(db,'skorlar/'+isim.replace(/[.#$\[\]]/g,'_'));
-    const snap=await get(skorRef);
+function skorKaydet(isim,yeniSkor){
+  if(!isim)return Promise.resolve(false);
+  const key=isim.replace(/[.#$\[\]/]/g,'_');
+  return db.ref('skorlar/'+key).once('value').then(snap=>{
     if(!snap.exists()||snap.val().skor<yeniSkor){
-      await set(skorRef,{isim:isim,skor:yeniSkor,tarih:Date.now()});
-      return true;
+      return db.ref('skorlar/'+key).set({isim:isim,skor:yeniSkor,tarih:Date.now()}).then(()=>true);
     }
     return false;
-  }catch(e){return false;}
+  }).catch(()=>false);
 }
 
 // PARS ÇİZ
 function parsCiz(x,y,vy){
   const s=PARSBOY;
   const aci=Math.min(Math.max(vy*1.5,-20),35)*Math.PI/180;
-  ctx.save();
-  ctx.translate(x,y);
-  ctx.rotate(aci);
-  ctx.shadowColor='rgba(0,0,0,0.4)';
-  ctx.shadowBlur=8;
-  ctx.shadowOffsetY=3;
-
-  // Vücut
-  ctx.beginPath();
-  ctx.ellipse(0,0,s*0.7,s*0.42,0,0,Math.PI*2);
-  const vG=ctx.createRadialGradient(-s*0.1,-s*0.1,s*0.1,0,0,s*0.7);
+  ctx.save();ctx.translate(x,y);ctx.rotate(aci);
+  ctx.shadowColor='rgba(0,0,0,0.4)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;
+  ctx.beginPath();ctx.ellipse(0,0,s*.7,s*.42,0,0,Math.PI*2);
+  const vG=ctx.createRadialGradient(-s*.1,-s*.1,s*.1,0,0,s*.7);
   vG.addColorStop(0,'#f5a623');vG.addColorStop(0.5,'#e8921a');vG.addColorStop(1,'#c47010');
   ctx.fillStyle=vG;ctx.fill();
-
-  // Karın
-  ctx.beginPath();
-  ctx.ellipse(s*0.05,s*0.1,s*0.32,s*0.25,0.1,0,Math.PI*2);
+  ctx.beginPath();ctx.ellipse(s*.05,s*.1,s*.32,s*.25,0.1,0,Math.PI*2);
   ctx.fillStyle='#fce8c0';ctx.fill();
-
-  // Benekler
   ctx.fillStyle='rgba(139,69,19,0.7)';
-  [[-s*.3,-s*.15,s*.07],[-s*.1,-s*.2,s*.065],[s*.15,-s*.18,s*.07],[s*.35,-s*.1,s*.055],[-s*.25,s*.05,s*.065],[s*.0,s*.05,s*.07],[s*.25,s*.08,s*.055]].forEach(([bx,by,br])=>{
+  [[-s*.3,-s*.15,s*.07],[-s*.1,-s*.2,s*.065],[s*.15,-s*.18,s*.07],[s*.35,-s*.1,s*.055],[-s*.25,s*.05,s*.065],[0,s*.05,s*.07],[s*.25,s*.08,s*.055]].forEach(([bx,by,br])=>{
     ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fill();
   });
-
-  // Bacaklar
-  ctx.strokeStyle='#c47010';ctx.lineWidth=s*0.11;ctx.lineCap='round';
+  ctx.strokeStyle='#c47010';ctx.lineWidth=s*.11;ctx.lineCap='round';
   [[s*.2,s*.2,s*.3,s*.42],[s*.05,s*.25,s*.1,s*.48],[-s*.35,s*.2,-s*.45,s*.42],[-s*.2,s*.25,-s*.25,s*.45]].forEach(([x1,y1,x2,y2])=>{
     ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
   });
-
-  // Kuyruk
-  ctx.beginPath();
-  ctx.moveTo(-s*.65,s*.05);
-  ctx.bezierCurveTo(-s*.9,s*.1,-s*.95,-s*.2,-s*.75,-s*.3);
+  ctx.beginPath();ctx.moveTo(-s*.65,s*.05);ctx.bezierCurveTo(-s*.9,s*.1,-s*.95,-s*.2,-s*.75,-s*.3);
   ctx.strokeStyle='#e8921a';ctx.lineWidth=s*.09;ctx.stroke();
-
-  // Baş
   ctx.shadowBlur=0;
   const hy=vy<-1?-s*.38:-s*.18;
-  ctx.beginPath();
-  ctx.arc(s*.6,hy,s*.36,0,Math.PI*2);
+  ctx.beginPath();ctx.arc(s*.6,hy,s*.36,0,Math.PI*2);
   const bG=ctx.createRadialGradient(s*.5,hy-s*.05,s*.05,s*.6,hy,s*.36);
   bG.addColorStop(0,'#f5a623');bG.addColorStop(0.6,'#e8921a');bG.addColorStop(1,'#c47010');
   ctx.fillStyle=bG;ctx.fill();
-
-  // Yüz beyazı
-  ctx.beginPath();
-  ctx.ellipse(s*.65,hy+s*.05,s*.18,s*.23,0,0,Math.PI*2);
-  ctx.fillStyle='#fce8c0';ctx.fill();
-
-  // Kulaklar
+  ctx.beginPath();ctx.ellipse(s*.65,hy+s*.05,s*.18,s*.23,0,0,Math.PI*2);ctx.fillStyle='#fce8c0';ctx.fill();
   ctx.fillStyle='#e8921a';
   ctx.beginPath();ctx.moveTo(s*.45,hy-s*.26);ctx.lineTo(s*.3,hy-s*.48);ctx.lineTo(s*.58,hy-s*.33);ctx.fill();
   ctx.beginPath();ctx.moveTo(s*.7,hy-s*.26);ctx.lineTo(s*.85,hy-s*.48);ctx.lineTo(s*.75,hy-s*.2);ctx.fill();
   ctx.fillStyle='#ff8c69';
   ctx.beginPath();ctx.moveTo(s*.47,hy-s*.28);ctx.lineTo(s*.36,hy-s*.42);ctx.lineTo(s*.56,hy-s*.31);ctx.fill();
-
-  // Gözler
   [[s*.54,hy-s*.1],[s*.71,hy-s*.1]].forEach(([ex,ey])=>{
     ctx.beginPath();ctx.arc(ex,ey,s*.09,0,Math.PI*2);ctx.fillStyle='white';ctx.fill();
     ctx.beginPath();ctx.arc(ex+s*.01,ey,s*.055,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();
     ctx.beginPath();ctx.arc(ex+s*.02,ey-s*.03,s*.022,0,Math.PI*2);ctx.fillStyle='white';ctx.fill();
   });
-
-  // Burun
   ctx.beginPath();ctx.arc(s*.77,hy+s*.06,s*.055,0,Math.PI*2);ctx.fillStyle='#ff6b6b';ctx.fill();
-
-  // Ağız
   ctx.beginPath();ctx.moveTo(s*.67,hy+s*.11);ctx.quadraticCurveTo(s*.77,hy+s*.19,s*.87,hy+s*.11);
   ctx.strokeStyle='#8b4513';ctx.lineWidth=s*.038;ctx.lineCap='round';ctx.stroke();
-
   ctx.restore();
 }
 
-// AĞAÇ ÇİZ
+// AĞAÇ
 function agacCiz(x,y1,y2,ust){
-  const gG=Math.floor(BGENISLIK*0.28);
-  const gX=x+BGENISLIK/2-gG/2;
+  const gG=Math.floor(BGENISLIK*.28),gX=x+BGENISLIK/2-gG/2;
   const gGrad=ctx.createLinearGradient(gX,0,gX+gG,0);
   gGrad.addColorStop(0,'#2a1200');gGrad.addColorStop(0.35,'#5c2e00');gGrad.addColorStop(0.65,'#7a3e0a');gGrad.addColorStop(1,'#2a1200');
-  ctx.fillStyle=gGrad;
-  ctx.beginPath();ctx.roundRect(gX,y1,gG,y2-y1,3);ctx.fill();
-
-  // Doku
+  ctx.fillStyle=gGrad;ctx.beginPath();ctx.roundRect(gX,y1,gG,y2-y1,3);ctx.fill();
   ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1;
   for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(gX+gG*.2+i*gG*.25,y1);ctx.lineTo(gX+gG*.15+i*gG*.25,y2);ctx.stroke();}
-
   const yapY=ust?y2:y1;
   for(let k=0;k<3;k++){
-    const yOf=(ust?-1:1)*(k*20+18);
-    const gen=BGENISLIK*(1.15-k*.12);
+    const yOf=(ust?-1:1)*(k*20+18),gen=BGENISLIK*(1.15-k*.12);
     for(let i=0;i<7;i++){
-      const a=(i/7)*Math.PI*2;
-      const lx=x+BGENISLIK/2+Math.cos(a)*gen*.38;
-      const ly=yapY+yOf+Math.sin(a)*gen*.22;
+      const a=(i/7)*Math.PI*2,lx=x+BGENISLIK/2+Math.cos(a)*gen*.38,ly=yapY+yOf+Math.sin(a)*gen*.22;
       ctx.beginPath();ctx.arc(lx,ly,gen*.2,0,Math.PI*2);
       ctx.fillStyle=`hsl(${108+k*8+i*2},${68+k*4}%,${22+k*4}%)`;ctx.fill();
     }
     ctx.beginPath();ctx.arc(x+BGENISLIK/2,yapY+yOf,gen*.28,0,Math.PI*2);
     ctx.fillStyle=`hsl(${118+k*6},72%,${26+k*3}%)`;ctx.fill();
-    ctx.beginPath();ctx.arc(x+BGENISLIK/2-4,yapY+yOf-4,gen*.1,0,Math.PI*2);
-    ctx.fillStyle='rgba(150,255,100,0.1)';ctx.fill();
   }
 }
 
 // OYUN
 function oyunuBaslat(){
   goster('oyun-ui');
-  pars={y:H/2,vy:0};
-  borular=[];skor=0;aktif=true;ilkZiplama=false;
+  pars={y:H/2,vy:0};borular=[];skor=0;aktif=true;ilkZiplama=false;
   document.getElementById('skor').textContent='0';
   document.getElementById('en-iyi-text').textContent='🏆 '+enYuksek;
   if(raf)cancelAnimationFrame(raf);
   loop();
 }
 
-function zipla(){
-  if(!aktif)return;
-  ilkZiplama=true;pars.vy=ZIPLAMA;
-}
-
+function zipla(){if(!aktif)return;ilkZiplama=true;pars.vy=ZIPLAMA;}
 canvas.addEventListener('click',zipla);
 canvas.addEventListener('touchstart',e=>{e.preventDefault();zipla();},{passive:false});
 document.addEventListener('keydown',e=>{if(e.code==='Space'&&aktif)zipla();});
@@ -459,17 +358,12 @@ function loop(){
   const hiz=Math.min(2+skor*.06,6.5);
   const yer=ilkZiplama?Math.min(YER_NORMAL+skor*.005,0.55):YER_YAVASH;
   pars.vy+=yer;pars.y+=pars.vy;
-
   if(borular.length===0||borular[borular.length-1].x<W-W*.6)boruEkle();
   for(let i=borular.length-1;i>=0;i--){
     borular[i].x-=hiz;
-    if(!borular[i].gecildi&&borular[i].x+BGENISLIK<PARSX){
-      borular[i].gecildi=true;skor++;
-      document.getElementById('skor').textContent=skor;
-    }
+    if(!borular[i].gecildi&&borular[i].x+BGENISLIK<PARSX){borular[i].gecildi=true;skor++;document.getElementById('skor').textContent=skor;}
     if(borular[i].x+BGENISLIK<0)borular.splice(i,1);
   }
-
   if(pars.y-PARSBOY/2<0||pars.y+PARSBOY/2>H-15){oldu();return;}
   for(const b of borular){
     if(PARSX+PARSBOY/2-8>b.x&&PARSX-PARSBOY/2+8<b.x+BGENISLIK){
@@ -480,8 +374,7 @@ function loop(){
 }
 
 function boruEkle(){
-  const min=H*.15,max=H-ARALIK-H*.15;
-  const ust=Math.random()*(max-min)+min;
+  const min=H*.15,max=H-ARALIK-H*.15,ust=Math.random()*(max-min)+min;
   borular.push({x:W+BGENISLIK,ust:ust,alt:ust+ARALIK,gecildi:false});
 }
 
@@ -489,37 +382,28 @@ function ciz(){
   const g=ctx.createLinearGradient(0,0,0,H);
   g.addColorStop(0,'#061a0e');g.addColorStop(0.5,'#0d2b18');g.addColorStop(1,'#1a4a20');
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-
   for(const b of borular){agacCiz(b.x,0,b.ust,true);agacCiz(b.x,b.alt,H,false);}
-
   const zG=ctx.createLinearGradient(0,H-25,0,H);
   zG.addColorStop(0,'#4acd20');zG.addColorStop(0.3,'#2d8a10');zG.addColorStop(1,'#1a5c0a');
   ctx.fillStyle=zG;ctx.fillRect(0,H-20,W,20);
   ctx.fillStyle='#5aee28';
   for(let i=0;i<W;i+=12){ctx.fillRect(i,H-23,3,5);ctx.fillRect(i+6,H-25,2,7);}
-
   parsCiz(PARSX,pars.y,pars.vy);
 }
 
-async function oldu(){
-  aktif=false;
-  cancelAnimationFrame(raf);
+function oldu(){
+  aktif=false;cancelAnimationFrame(raf);
   if(skor>enYuksek)enYuksek=skor;
-
-  document.body.classList.remove('sarsin');
-  void document.body.offsetWidth;
-  document.body.classList.add('sarsin');
+  document.body.classList.remove('sarsin');void document.body.offsetWidth;document.body.classList.add('sarsin');
   ctx.fillStyle='rgba(255,0,0,0.2)';ctx.fillRect(0,0,W,H);
-
   document.getElementById('son-skor').textContent=skor;
   document.getElementById('oldu-en-iyi').textContent='🏆 En Yüksek: '+enYuksek;
   document.getElementById('kayit-mesaj').textContent='';
-
   setTimeout(()=>goster('oldu'),250);
-
   if(oyuncuIsim){
-    const kayitOldu=await skorKaydet(oyuncuIsim,skor);
-    document.getElementById('kayit-mesaj').textContent=kayitOldu?'✅ Skor kaydedildi!':'📊 Skor güncellenmedi';
+    skorKaydet(oyuncuIsim,skor).then(ok=>{
+      document.getElementById('kayit-mesaj').textContent=ok?'✅ Skor kaydedildi!':'📊 Zaten daha yüksek skorun var!';
+    });
   }
 }
 </script>
