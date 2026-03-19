@@ -239,10 +239,27 @@ document.getElementById('lider-kapat').addEventListener('click',()=>goster('menu
 function liderlikYukle(){
   const liste=document.getElementById('lider-liste');
   liste.innerHTML='<div style="color:#666;text-align:center;padding:20px">⏳ Yükleniyor...</div>';
-  db.ref('skorlar').orderByChild('skor').limitToLast(10).once('value').then(snap=>{
+  db.ref('skorlar').once('value').then(snap=>{
     if(!snap.exists()){
       liste.innerHTML='<div style="color:#666;text-align:center;padding:20px">Henüz skor yok!<br>İlk sen ol! 🏆</div>';
       return;
+    }
+    const skorlar=[];
+    snap.forEach(c=>skorlar.push(c.val()));
+    skorlar.sort((a,b)=>b.skor-a.skor);
+    const siraflar=['🥇','🥈','🥉'];
+    const siniflar=['altin','gumus','bronz'];
+    liste.innerHTML=skorlar.slice(0,10).map((s,i)=>`
+      <div class="lider-item ${siniflar[i]||''}">
+        <div class="lider-sira">${siraflar[i]||'#'+(i+1)}</div>
+        <div class="lider-isim">${s.isim}</div>
+        <div class="lider-skor">${s.skor}</div>
+      </div>
+    `).join('');
+  }).catch(()=>{
+    liste.innerHTML='<div style="color:#f66;text-align:center;padding:20px">Bağlantı hatası!</div>';
+  });
+}
     }
     const skorlar=[];
     snap.forEach(c=>skorlar.push(c.val()));
