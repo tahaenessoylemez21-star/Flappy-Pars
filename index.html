@@ -6,215 +6,379 @@
 <title>Flappy Pars</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #07070f;
-    --panel: #0f0f1a;
-    --pink: #ff006e;
-    --yellow: #ffbe0b;
-    --green: #00ff88;
-    --dim: #4a4a6a;
-    --text: #d0d0ff;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    background: var(--bg);
-    font-family: 'Press Start 2P', monospace;
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    overflow: hidden; position: relative; color: var(--text);
-  }
-  body::before {
-    content:''; position:fixed; inset:0;
-    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
-    pointer-events:none; z-index:100;
-  }
-  body::after {
-    content:''; position:fixed; inset:0;
-    background: radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.7) 100%);
-    pointer-events:none; z-index:99;
-  }
-  .grid-bg {
-    position:fixed; inset:0;
-    background-image:
-      linear-gradient(rgba(255,0,110,0.02) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(255,0,110,0.02) 1px,transparent 1px);
-    background-size:40px 40px; pointer-events:none;
-  }
-  /* Ana ekran */
-  .screen { display:none; flex-direction:column; align-items:center; justify-content:center; width:100%; position:relative; z-index:10; }
-  .screen.active { display:flex; }
+* { margin:0; padding:0; box-sizing:border-box; }
 
-  /* Başlık */
-  h1 {
-    font-family:'Orbitron',monospace; font-weight:900;
-    font-size:clamp(1rem,5vw,2.2rem);
-    letter-spacing:0.2em; margin-bottom:16px;
-    animation:flicker 4s infinite;
-  }
-  .title-flappy{color:var(--yellow);text-shadow:0 0 10px var(--yellow),0 0 30px var(--yellow);}
-  .title-pars{color:var(--pink);text-shadow:0 0 10px var(--pink),0 0 30px var(--pink);}
-  @keyframes flicker{0%,94%,100%{opacity:1}95%{opacity:.7}97%{opacity:.5}98%{opacity:1}}
+body {
+  background: #07070f;
+  font-family: 'Press Start 2P', monospace;
+  min-height: 100vh;
+  overflow: hidden;
+  color: #d0d0ff;
+}
 
-  /* Menü */
-  .menu-screen {
-    gap: 20px;
-    padding: 20px;
-    width: 100%;
-    max-width: 420px;
-  }
-  .action-btn {
-    background:transparent; border:2px solid var(--pink); color:var(--pink);
-    font-family:'Press Start 2P',monospace; font-size:0.6rem;
-    padding:14px 24px; cursor:pointer; letter-spacing:0.12em;
-    text-shadow:0 0 10px var(--pink); border-radius:2px;
-    transition:background 0.15s; animation:pulse-btn 2s infinite;
-    width:100%; max-width:280px;
-  }
-  .action-btn:hover{background:rgba(255,0,110,0.12);}
-  .action-btn.green{border-color:var(--green);color:var(--green);text-shadow:0 0 10px var(--green);}
-  .action-btn.green:hover{background:rgba(0,255,136,0.12);}
-  @keyframes pulse-btn{0%,100%{box-shadow:0 0 10px rgba(255,0,110,0.2)}50%{box-shadow:0 0 28px rgba(255,0,110,0.5)}}
+/* Scanline */
+body::before {
+  content:''; position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
+  pointer-events:none; z-index:1000;
+}
 
-  /* Liderlik tablosu menüde */
-  .menu-lb {
-    width:100%; max-width:340px;
-    background: rgba(255,0,110,0.05);
-    border:1px solid rgba(255,0,110,0.15);
-    border-radius:4px; padding:12px;
-  }
-  .menu-lb-title {
-    font-size:0.45rem; color:var(--yellow);
-    text-shadow:0 0 8px var(--yellow);
-    text-align:center; margin-bottom:10px;
-    letter-spacing:0.1em;
-  }
-  .lb-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:4px;padding:4px 6px;background:rgba(255,255,255,0.02);border-radius:2px;}
-  .lb-rank{font-size:0.32rem;color:var(--dim);min-width:20px;}
-  .lb-rank.gold{color:var(--yellow);text-shadow:0 0 6px var(--yellow);}
-  .lb-rank.silver{color:#aaaacc;}
-  .lb-rank.bronze{color:#cc8844;}
-  .lb-name{font-size:0.32rem;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .lb-score{font-size:0.32rem;color:var(--pink);text-shadow:0 0 4px var(--pink);}
-  .lb-empty{font-size:0.3rem;color:var(--dim);text-align:center;padding:8px 0;}
+/* ── MENÜ ── */
+#menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 16px;
+  padding: 20px;
+}
 
-  /* Oyun ekranı */
-  .game-screen {
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-    justify-content: flex-start;
-  }
+#menu h1 {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: clamp(1.2rem, 5vw, 2.5rem);
+  letter-spacing: 0.2em;
+  text-align: center;
+  margin-bottom: 8px;
+}
 
-  #game-canvas {
-    display:block;
-    image-rendering:pixelated;
-  }
+.t1 { color:#ffbe0b; text-shadow:0 0 15px #ffbe0b, 0 0 40px #ffbe0b; }
+.t2 { color:#ff006e; text-shadow:0 0 15px #ff006e, 0 0 40px #ff006e; }
 
-  /* HUD üst bar */
-  .hud-bar {
-    display:none;
-    position:fixed; top:0; left:0; right:0;
-    padding:6px 12px;
-    background:rgba(0,0,0,0.5);
-    backdrop-filter:blur(4px);
-    z-index:200;
-    align-items:center; justify-content:space-between;
-    border-bottom:1px solid rgba(255,0,110,0.15);
-  }
-  .hud-bar.active { display:flex; }
-  .hud-item { font-size:0.45rem; }
-  .hud-score { color:var(--yellow); text-shadow:0 0 8px var(--yellow); }
-  .hud-coins { color:var(--yellow); text-shadow:0 0 6px var(--yellow); }
-  .hud-level { color:var(--pink); text-shadow:0 0 6px var(--pink); }
-  .hud-best  { color:var(--dim); font-size:0.38rem; }
+.pars-emoji {
+  font-size: clamp(3rem, 10vw, 5rem);
+  animation: bounce 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 16px rgba(255,190,11,0.8));
+}
 
-  /* Touch */
-  .touch-controls{display:none;position:fixed;bottom:16px;left:0;right:0;align-items:center;z-index:200;}
-  .tap-btn{width:90%;max-width:380px;padding:18px;background:rgba(255,0,110,0.1);border:2px solid rgba(255,0,110,0.45);color:var(--pink);font-family:'Press Start 2P',monospace;font-size:0.75rem;border-radius:10px;cursor:pointer;letter-spacing:0.1em;text-shadow:0 0 8px var(--pink);touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:background 0.08s,transform 0.08s;}
-  .tap-btn:active{background:rgba(255,0,110,0.28);transform:scale(0.96);}
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
 
-  /* Overlay (oyun içi) */
-  .game-overlay{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.88);z-index:300;gap:12px;backdrop-filter:blur(3px);padding:20px;}
-  .game-overlay.active{display:flex;}
-  .game-overlay h2{font-family:'Orbitron',monospace;font-size:clamp(0.9rem,3vw,1.4rem);color:var(--pink);text-shadow:0 0 20px var(--pink);text-align:center;}
-  .game-overlay p{font-size:0.38rem;color:var(--dim);text-align:center;line-height:2.2;}
-  .score-big{font-size:1rem;color:var(--yellow);text-shadow:0 0 12px var(--yellow);}
-  .new-record{font-size:0.38rem;color:var(--green);text-shadow:0 0 8px var(--green);animation:pulse-btn 1s infinite;}
-  .score-breakdown{font-size:0.3rem;color:var(--dim);text-align:center;line-height:2.2;background:rgba(255,255,255,0.03);border-radius:4px;padding:8px 12px;border:1px solid rgba(255,255,255,0.05);}
-  .score-breakdown span{color:var(--yellow);}
+.start-btn {
+  background: transparent;
+  border: 2px solid #ff006e;
+  color: #ff006e;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  padding: 16px 32px;
+  cursor: pointer;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 10px #ff006e;
+  border-radius: 4px;
+  animation: glow 2s infinite;
+  width: 100%;
+  max-width: 300px;
+}
 
-  /* Go LB */
-  .go-lb{width:100%;max-width:280px;background:rgba(255,0,110,0.05);border:1px solid rgba(255,0,110,0.1);border-radius:4px;padding:10px;}
-  .go-lb-title{font-size:0.32rem;color:var(--yellow);text-align:center;margin-bottom:8px;}
+@keyframes glow {
+  0%,100%{box-shadow:0 0 10px rgba(255,0,110,0.3)}
+  50%{box-shadow:0 0 30px rgba(255,0,110,0.7)}
+}
 
-  /* Name input */
-  .name-input{background:rgba(255,0,110,0.08);border:1px solid rgba(255,0,110,0.35);color:var(--pink);font-family:'Press Start 2P',monospace;font-size:0.5rem;padding:10px 12px;border-radius:2px;text-align:center;width:100%;max-width:220px;letter-spacing:0.1em;outline:none;}
-  .name-input::placeholder{color:var(--dim);}
-  .name-input:focus{border-color:rgba(255,0,110,0.7);}
+.start-btn:active { background: rgba(255,0,110,0.2); transform: scale(0.97); }
 
-  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+/* Menü liderlik */
+.menu-lb {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(255,0,110,0.06);
+  border: 1px solid rgba(255,0,110,0.2);
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.menu-lb h3 {
+  font-size: 0.5rem;
+  color: #ffbe0b;
+  text-shadow: 0 0 8px #ffbe0b;
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 0.1em;
+}
+
+.lb-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 8px;
+  margin-bottom: 4px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 3px;
+  gap: 6px;
+}
+
+.lb-rank { font-size:0.34rem; min-width:24px; color:#4a4a6a; }
+.lb-rank.g { color:#ffbe0b; text-shadow:0 0 6px #ffbe0b; }
+.lb-rank.s { color:#aaaacc; }
+.lb-rank.b { color:#cc8844; }
+.lb-name { font-size:0.34rem; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#d0d0ff; }
+.lb-score { font-size:0.34rem; color:#ff006e; text-shadow:0 0 4px #ff006e; }
+.lb-empty { font-size:0.3rem; color:#4a4a6a; text-align:center; padding:8px; }
+
+/* ── OYUN ── */
+#game { display:none; position:fixed; inset:0; }
+
+#game-canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  image-rendering: pixelated;
+}
+
+/* HUD - Sol üst */
+#hud {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255,0,110,0.2);
+  z-index: 500;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-left { display:flex; flex-direction:column; gap:4px; }
+.hud-center { text-align:center; }
+.hud-right { text-align:right; }
+
+.hud-score {
+  font-size: clamp(0.7rem, 3vw, 1.1rem);
+  color: #ffbe0b;
+  text-shadow: 0 0 10px #ffbe0b;
+}
+
+.hud-coins {
+  font-size: clamp(0.45rem, 2vw, 0.6rem);
+  color: #ffbe0b;
+  text-shadow: 0 0 6px #ffbe0b;
+}
+
+.hud-level {
+  font-size: clamp(0.45rem, 2vw, 0.6rem);
+  color: #ff006e;
+  text-shadow: 0 0 6px #ff006e;
+  margin-top: 2px;
+}
+
+.hud-best {
+  font-size: clamp(0.35rem, 1.5vw, 0.5rem);
+  color: #4a4a6a;
+}
+
+/* Touch zıplama butonu */
+#tap-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 88%;
+  max-width: 400px;
+  padding: 20px;
+  background: rgba(255,0,110,0.12);
+  border: 2px solid rgba(255,0,110,0.5);
+  color: #ff006e;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.85rem;
+  border-radius: 12px;
+  cursor: pointer;
+  text-shadow: 0 0 8px #ff006e;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 500;
+}
+
+#tap-btn:active {
+  background: rgba(255,0,110,0.3);
+  transform: translateX(-50%) scale(0.96);
+  box-shadow: 0 0 30px rgba(255,0,110,0.5);
+}
+
+/* ── OVERLAY ── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.9);
+  z-index: 600;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.overlay.show { display:flex; }
+
+.overlay h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1rem, 4vw, 1.6rem);
+  color: #ff006e;
+  text-shadow: 0 0 20px #ff006e;
+  text-align: center;
+}
+
+.score-big {
+  font-size: clamp(1rem, 5vw, 1.8rem);
+  color: #ffbe0b;
+  text-shadow: 0 0 16px #ffbe0b;
+}
+
+.new-record {
+  font-size: 0.45rem;
+  color: #00ff88;
+  text-shadow: 0 0 10px #00ff88;
+  animation: glow2 1s infinite;
+}
+
+@keyframes glow2 { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+.breakdown {
+  font-size: 0.32rem;
+  color: #4a4a6a;
+  text-align: center;
+  line-height: 2.2;
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  width: 100%;
+  max-width: 280px;
+}
+
+.breakdown span { color: #ffbe0b; }
+
+.go-lb {
+  width: 100%;
+  max-width: 300px;
+  background: rgba(255,0,110,0.05);
+  border: 1px solid rgba(255,0,110,0.15);
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.go-lb h4 {
+  font-size: 0.36rem;
+  color: #ffbe0b;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.ov-btn {
+  background: transparent;
+  border: 2px solid #ff006e;
+  color: #ff006e;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  padding: 13px 20px;
+  cursor: pointer;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 8px #ff006e;
+  border-radius: 3px;
+  width: 100%;
+  max-width: 260px;
+  animation: glow 2s infinite;
+}
+
+.ov-btn:active { background: rgba(255,0,110,0.2); }
+
+.ov-btn.green {
+  border-color: #00ff88;
+  color: #00ff88;
+  text-shadow: 0 0 8px #00ff88;
+}
+
+.name-input {
+  background: rgba(255,0,110,0.08);
+  border: 1px solid rgba(255,0,110,0.4);
+  color: #ff006e;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  padding: 12px 14px;
+  border-radius: 3px;
+  text-align: center;
+  width: 100%;
+  max-width: 250px;
+  letter-spacing: 0.1em;
+  outline: none;
+}
+
+.name-input::placeholder { color: #4a4a6a; }
+.name-input:focus { border-color: rgba(255,0,110,0.8); box-shadow: 0 0 12px rgba(255,0,110,0.3); }
 </style>
 </head>
 <body>
-<div class="grid-bg"></div>
 
-<!-- HUD -->
-<div class="hud-bar" id="hud-bar">
-  <div class="hud-item hud-score" id="hud-score">0</div>
-  <div class="hud-item hud-coins" id="hud-coins">🪙0</div>
-  <div class="hud-item hud-level" id="hud-level">LV1</div>
-  <div class="hud-item hud-best" id="hud-best">EN İYİ: 0</div>
-</div>
-
-<!-- Touch -->
-<div class="touch-controls" id="touch-controls">
-  <button class="tap-btn" id="tap-btn">🐆 ZIPLA!</button>
-</div>
-
-<!-- MENÜ EKRANI -->
-<div class="screen menu-screen active" id="menu-screen">
-  <h1><span class="title-flappy">FLAPPY</span> <span class="title-pars">PARS 🐆</span></h1>
-
-  <button class="action-btn" id="start-btn">▶ BAŞLA</button>
-
+<!-- ═══ MENÜ ═══ -->
+<div id="menu">
+  <h1><span class="t1">FLAPPY</span> <span class="t2">PARS</span></h1>
+  <div class="pars-emoji">🐆</div>
+  <button class="start-btn" id="start-btn">▶ OYNA</button>
   <div class="menu-lb">
-    <div class="menu-lb-title">🏆 LİDERLİK TABLOSU</div>
-    <div id="lb-list"><div class="lb-empty">Yükleniyor...</div></div>
+    <h3>🏆 LİDERLİK TABLOSU</h3>
+    <div id="lb-menu"><div class="lb-empty">Yükleniyor...</div></div>
   </div>
-
-  <div style="font-size:0.3rem;color:var(--dim);text-align:center;line-height:2;">
-    🪙 Altın = 5×Seviye &nbsp; | &nbsp; Boru = 10×Seviye
+  <div style="font-size:0.28rem;color:#4a4a6a;text-align:center;line-height:2;">
+    🪙 Altın = 5 × Seviye &nbsp;|&nbsp; Boru = 10 × Seviye
   </div>
 </div>
 
-<!-- OYUN CANVAS -->
-<div class="screen game-screen" id="game-screen">
+<!-- ═══ OYUN ═══ -->
+<div id="game">
   <canvas id="game-canvas"></canvas>
 </div>
 
-<!-- Oyun sonu overlay -->
-<div class="game-overlay" id="gameover-overlay">
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-left">
+    <div class="hud-coins" id="hud-coins">🪙 0</div>
+    <div class="hud-level" id="hud-level">SEVİYE 1</div>
+  </div>
+  <div class="hud-center">
+    <div class="hud-score" id="hud-score">0</div>
+  </div>
+  <div class="hud-right">
+    <div class="hud-best" id="hud-best">EN İYİ: 0</div>
+  </div>
+</div>
+
+<!-- Zıplama butonu -->
+<button id="tap-btn">🐆 ZIPLA!</button>
+
+<!-- ═══ OVERLAY: OYUN SONU ═══ -->
+<div class="overlay" id="ov-gameover">
   <h2>OYUN BİTTİ</h2>
-  <div class="score-big" id="final-score">0</div>
-  <div class="new-record" id="new-record" style="display:none;">★ YENİ REKOR! ★</div>
-  <div class="score-breakdown" id="score-breakdown"></div>
-  <div class="go-lb"><div class="go-lb-title">🏆 TOP 5</div><div id="go-lb-list"></div></div>
-  <button class="action-btn" id="restart-btn">TEKRAR</button>
-  <button class="action-btn green" id="menu-btn">ANA MENÜ</button>
+  <div class="score-big" id="go-score">0</div>
+  <div class="new-record" id="go-record" style="display:none;">★ YENİ REKOR! ★</div>
+  <div class="breakdown" id="go-breakdown"></div>
+  <div class="go-lb">
+    <h4>🏆 LİDERLİK</h4>
+    <div id="lb-go"><div class="lb-empty">...</div></div>
+  </div>
+  <button class="ov-btn" id="btn-restart">▶ TEKRAR</button>
+  <button class="ov-btn green" id="btn-menu">ANA MENÜ</button>
 </div>
 
-<!-- İsim overlay -->
-<div class="game-overlay" id="name-overlay">
-  <h2>🏆 REKOR!</h2>
+<!-- ═══ OVERLAY: İSİM ═══ -->
+<div class="overlay" id="ov-name">
+  <h2>🏆 YENİ REKOR!</h2>
   <div class="score-big" id="name-score">0</div>
-  <p style="font-size:0.34rem;">İsmin nedir?</p>
+  <p style="font-size:0.36rem;color:#4a4a6a;">İsmin nedir?</p>
   <input class="name-input" id="name-input" maxlength="10" placeholder="İSMİNİ YAZ" autocomplete="off"/>
-  <button class="action-btn" id="name-submit">KAYDET ▶</button>
+  <button class="ov-btn" id="btn-name-save">KAYDET ▶</button>
 </div>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-const FB_CONFIG = {
+// ── Firebase ──────────────────────────────
+firebase.initializeApp({
   apiKey: "AIzaSyBLwHbX1MwJEzyJ71GRtLkcChkgatFAgS0",
   authDomain: "flappy-pars.firebaseapp.com",
   databaseURL: "https://flappy-pars-default-rtdb.firebaseio.com",
@@ -222,24 +386,18 @@ const FB_CONFIG = {
   storageBucket: "flappy-pars.firebasestorage.app",
   messagingSenderId: "995587188702",
   appId: "1:995587188702:web:e0042cb45d617b47ef9f4f"
-};
-</script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-firebase.initializeApp(FB_CONFIG);
+});
+
 const db = firebase.database();
 const scoresRef = db.ref('flappy_pars_scores');
 let leaderboard = [];
 
-function loadLeaderboard() {
-  scoresRef.orderByChild('score').limitToLast(10).on('value', snap => {
-    leaderboard = [];
-    snap.forEach(c => leaderboard.push(c.val()));
-    leaderboard.sort((a,b) => b.score - a.score);
-    renderLB('lb-list', leaderboard, 10);
-  });
-}
+scoresRef.orderByChild('score').limitToLast(10).on('value', snap => {
+  leaderboard = [];
+  snap.forEach(c => leaderboard.push(c.val()));
+  leaderboard.sort((a,b) => b.score - a.score);
+  renderLB('lb-menu', leaderboard, 10);
+});
 
 function saveScore(name, score) {
   scoresRef.push({ name: name.toUpperCase().slice(0,10), score, date: Date.now() });
@@ -249,7 +407,7 @@ function renderLB(id, data, max) {
   const el = document.getElementById(id);
   if (!el) return;
   if (!data.length) { el.innerHTML='<div class="lb-empty">Henüz skor yok</div>'; return; }
-  const medals=['🥇','🥈','🥉'], cls=['gold','silver','bronze'];
+  const medals=['🥇','🥈','🥉'], cls=['g','s','b'];
   el.innerHTML = data.slice(0,max).map((r,i)=>`
     <div class="lb-row">
       <span class="lb-rank ${cls[i]||''}">${medals[i]||i+1}</span>
@@ -258,138 +416,153 @@ function renderLB(id, data, max) {
     </div>`).join('');
 }
 
-loadLeaderboard();
-
-// ── Canvas tam ekran ───────────────────────
+// ── Canvas ────────────────────────────────
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
+function W() { return window.innerWidth; }
+function H() { return window.innerHeight; }
+
 function resizeCanvas() {
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width  = W();
+  canvas.height = H();
 }
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
 
-// ── Sabitler ───────────────────────────────
-const GRAVITY_START  = 0.14;
-const GRAVITY_MAX    = 0.36;
-const JUMP_START     = -4.8;
-const JUMP_MAX       = -6.8;
-const SPEED_START    = 1.0;
-const SPEED_MAX      = 3.2;
-const GAP_START      = 220;
-const GAP_MIN        = 115;
-const PIPE_VALUE     = 10;
-const COIN_VALUE     = 5;
-const COIN_R         = 12;
-const MAX_LEVEL      = 20;
+// ── Oyun sabitleri ────────────────────────
+const MAX_LEVEL   = 20;
+const PIPE_VAL    = 10;
+const COIN_VAL    = 5;
+const COIN_R      = Math.max(10, W() * 0.025);
 
+// Başlangıç çok yavaş, ilerledikçe zorlaşır
+const GR_START  = 0.12;   // Çok hafif yerçekimi
+const GR_MAX    = 0.38;
+const JP_START  = -4.2;   // Kısa zıplama
+const JP_MAX    = -6.5;
+const SP_START  = 1.0;    // Çok yavaş
+const SP_MAX    = 3.5;
+const GAP_START = 240;    // Çok geniş boşluk
+const GAP_MIN   = 110;
+
+// ── State ─────────────────────────────────
 let bird, pipes, coins, particles;
-let score, coinCount, level, speed, gap, gravity, jumpForce;
-let gameRunning, animId, frameCount;
+let score, coinCount, level, speed, gap, grav, jumpF;
+let running, animId, frame;
 let lastScore, lastCoins, lastPipes;
-let bestScore = parseInt(localStorage.getItem('fp_best_v3')||'0');
+let best = parseInt(localStorage.getItem('fp_best_v4')||'0');
 
-const stars = Array.from({length:80},()=>({
-  x:Math.random()*1000, y:Math.random()*1000,
-  r:Math.random()*1.5+0.3, a:Math.random(),
-  da:0.003+Math.random()*0.01
+const stars = Array.from({length:100}, () => ({
+  x: Math.random()*2000, y: Math.random()*2000,
+  r: Math.random()*1.5+0.3,
+  a: Math.random(), da: 0.003+Math.random()*0.01
 }));
 
-function getLV(start, max, lvl) {
-  const t = Math.min((lvl-1)/(MAX_LEVEL-1), 1);
-  return start + (max-start)*t;
+function lv(start, max, lvl) {
+  return start + (max-start) * Math.min((lvl-1)/(MAX_LEVEL-1), 1);
 }
 
-function updateLevelStats() {
-  speed     = getLV(SPEED_START, SPEED_MAX, level);
-  gap       = getLV(GAP_START, GAP_MIN, level);
-  gravity   = getLV(GRAVITY_START, GRAVITY_MAX, level);
-  jumpForce = getLV(JUMP_START, JUMP_MAX, level);
+function applyLevel() {
+  speed = lv(SP_START, SP_MAX, level);
+  gap   = lv(GAP_START, GAP_MIN, level);
+  grav  = lv(GR_START, GR_MAX, level);
+  jumpF = lv(JP_START, JP_MAX, level);
 }
 
-function W() { return canvas.width; }
-function H() { return canvas.height; }
-
+// ── Bird ──────────────────────────────────
 function initBird() {
-  bird = { x:W()*0.22, y:H()*0.45, vy:0, radius:18, alive:true };
+  bird = { x: W()*0.22, y: H()*0.45, vy: 0, r: Math.max(16, W()*0.04), alive: true };
 }
+
+// ── Pipe ──────────────────────────────────
+const PW = () => Math.max(48, W()*0.11);
 
 function addPipe() {
-  const topH = 60 + Math.random()*(H()-gap-160);
-  pipes.push({ x:W()+50, topH, passed:false });
-  const gapMid = topH+gap/2;
-  const spacing = W()*0.18;
+  const pw = PW();
+  const topH = 70 + Math.random() * (H() - gap - 180);
+  pipes.push({ x: W()+pw, topH, passed: false });
+  const mid = topH + gap/2;
+  const sp  = W() * 0.17;
   for (let i=0; i<3; i++) {
     coins.push({
-      x: W()+50+20+spacing*i+Math.random()*20,
-      y: gapMid+(Math.random()-0.5)*(gap*0.5),
-      collected:false, anim:Math.random()*Math.PI*2,
+      x: W()+pw+24+sp*i+Math.random()*18,
+      y: mid + (Math.random()-0.5)*gap*0.5,
+      ok: false, a: Math.random()*Math.PI*2
     });
   }
 }
 
-function spawnCoinFX(x, y) {
-  for (let i=0; i<10; i++) {
-    const angle=(Math.PI*2/10)*i, spd=1.5+Math.random()*3;
-    particles.push({x,y,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd-1,life:1,decay:0.05,color:Math.random()>0.5?'#ffbe0b':'#ffffff',size:2+Math.random()*4});
+// ── Particles ─────────────────────────────
+function fx(x, y, color) {
+  for (let i=0; i<12; i++) {
+    const ang = (Math.PI*2/12)*i;
+    const spd = 1.5+Math.random()*3;
+    particles.push({x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd-1,
+      life:1, decay:0.05+Math.random()*0.03,
+      color, size:2+Math.random()*4});
   }
 }
 
+// ── Draw ──────────────────────────────────
 function drawBg() {
-  const g=ctx.createLinearGradient(0,0,0,H());
-  g.addColorStop(0,'#080418'); g.addColorStop(0.6,'#0d1030'); g.addColorStop(1,'#0a1820');
+  const g = ctx.createLinearGradient(0,0,0,H());
+  g.addColorStop(0,'#080318'); g.addColorStop(0.6,'#0c1028'); g.addColorStop(1,'#091520');
   ctx.fillStyle=g; ctx.fillRect(0,0,W(),H());
-  stars.forEach(s=>{
+  stars.forEach(s => {
     s.a+=s.da; if(s.a>1||s.a<0) s.da*=-1;
-    ctx.globalAlpha=s.a*0.7; ctx.fillStyle='#ffffff';
+    ctx.globalAlpha=s.a*0.7; ctx.fillStyle='#fff';
     ctx.beginPath(); ctx.arc(s.x%W(),s.y%H(),s.r,0,Math.PI*2); ctx.fill();
   });
   ctx.globalAlpha=1;
 }
 
 function drawGround() {
-  const gh = Math.max(32, H()*0.06);
-  ctx.fillStyle='#0d200d'; ctx.fillRect(0,H()-gh,W(),gh);
+  const gh = Math.max(30, H()*0.055);
+  ctx.fillStyle='#0a1e0a';
+  ctx.fillRect(0,H()-gh,W(),gh);
   ctx.strokeStyle='#00ff88'; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(0,H()-gh); ctx.lineTo(W(),H()-gh); ctx.stroke();
-  ctx.strokeStyle='rgba(0,255,136,0.15)'; ctx.lineWidth=1;
-  for(let x=(frameCount*speed)%40;x<W();x+=40){
-    ctx.beginPath(); ctx.moveTo(x,H()-gh); ctx.lineTo(x+20,H()); ctx.stroke();
+  ctx.strokeStyle='rgba(0,255,136,0.12)'; ctx.lineWidth=1;
+  for (let x=(frame*speed)%44;x<W();x+=44) {
+    ctx.beginPath(); ctx.moveTo(x,H()-gh); ctx.lineTo(x+22,H()); ctx.stroke();
   }
 }
 
-function getGH() { return Math.max(32, H()*0.06); }
+function GH() { return Math.max(30, H()*0.055); }
 
-function drawPipe(p) {
-  const pw = Math.max(44, W()*0.1);
-  p.w = pw;
-  const tg=ctx.createLinearGradient(p.x,0,p.x+pw,0);
-  tg.addColorStop(0,'#005520'); tg.addColorStop(0.4,'#00aa44'); tg.addColorStop(1,'#003310');
-  ctx.shadowColor='#00ff66'; ctx.shadowBlur=10; ctx.fillStyle=tg;
-  ctx.fillRect(p.x,0,pw,p.topH);
-  ctx.fillRect(p.x-5,p.topH-18,pw+10,18);
-  const botY=p.topH+gap;
-  ctx.fillRect(p.x,botY,pw,H()-botY-getGH());
-  ctx.fillRect(p.x-5,botY,pw+10,18);
-  ctx.shadowBlur=0;
+function drawPipes() {
+  const pw = PW();
+  pipes.forEach(p => {
+    const g2 = ctx.createLinearGradient(p.x,0,p.x+pw,0);
+    g2.addColorStop(0,'#004d1a'); g2.addColorStop(0.45,'#00aa44'); g2.addColorStop(1,'#002e10');
+    ctx.shadowColor='#00ff66'; ctx.shadowBlur=10;
+    ctx.fillStyle=g2;
+    // Üst boru
+    ctx.fillRect(p.x, 0, pw, p.topH);
+    ctx.fillRect(p.x-6, p.topH-20, pw+12, 20);
+    // Alt boru
+    const by = p.topH+gap;
+    ctx.fillRect(p.x, by, pw, H()-by-GH());
+    ctx.fillRect(p.x-6, by, pw+12, 20);
+    ctx.shadowBlur=0;
+  });
 }
 
-function drawCoin(c) {
-  if(c.collected) return;
-  c.anim+=0.08;
-  const wobble=Math.sin(c.anim)*3;
-  ctx.shadowColor='#ffbe0b'; ctx.shadowBlur=16;
-  ctx.fillStyle='#ffbe0b';
-  ctx.beginPath(); ctx.arc(c.x,c.y+wobble,COIN_R,0,Math.PI*2); ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.fillStyle='#ffe566';
-  ctx.beginPath(); ctx.arc(c.x-3,c.y+wobble-3,COIN_R*0.4,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#cc8800';
-  ctx.font=`bold ${COIN_R}px serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('₺',c.x,c.y+wobble+1);
+function drawCoins() {
+  coins.forEach(c => {
+    if (c.ok) return;
+    c.a+=0.08;
+    const w = Math.sin(c.a)*3;
+    ctx.shadowColor='#ffbe0b'; ctx.shadowBlur=16;
+    ctx.fillStyle='#ffbe0b';
+    ctx.beginPath(); ctx.arc(c.x,c.y+w,COIN_R,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#ffe566';
+    ctx.beginPath(); ctx.arc(c.x-COIN_R*0.3,c.y+w-COIN_R*0.3,COIN_R*0.35,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#cc8800';
+    ctx.font=`bold ${COIN_R}px serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('₺',c.x,c.y+w+1);
+  });
 }
 
 function drawParticles() {
@@ -404,163 +577,186 @@ function drawParticles() {
 }
 
 function drawBird() {
-  ctx.save(); ctx.translate(bird.x,bird.y);
-  ctx.rotate(Math.max(-0.5,Math.min(Math.PI/2,bird.vy*0.06)));
-  ctx.shadowColor='#ffbe0b'; ctx.shadowBlur=22;
-  const sz = Math.max(32, W()*0.08);
+  ctx.save();
+  ctx.translate(bird.x, bird.y);
+  ctx.rotate(Math.max(-0.5, Math.min(Math.PI/2, bird.vy*0.065)));
+  ctx.shadowColor='#ffbe0b'; ctx.shadowBlur=24;
+  const sz = Math.max(28, W()*0.075);
   ctx.font=`${sz}px serif`;
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('🐆',0,0);
   ctx.shadowBlur=0; ctx.restore();
 }
 
-function updateHUD() {
-  document.getElementById('hud-score').textContent = score;
-  document.getElementById('hud-coins').textContent = `🪙${coinCount}`;
-  document.getElementById('hud-level').textContent = `LV${level}`;
-  document.getElementById('hud-best').textContent  = `EN İYİ: ${bestScore}`;
-}
-
+// ── Update ────────────────────────────────
 function update() {
-  if(!bird.alive) return;
-  frameCount++;
-  bird.vy+=gravity; bird.y+=bird.vy;
-  const gh = getGH();
-  if(bird.y+bird.radius>=H()-gh||bird.y-bird.radius<=0){die();return;}
+  if (!bird.alive) return;
+  frame++;
+  bird.vy += grav;
+  bird.y  += bird.vy;
 
-  for(let i=pipes.length-1;i>=0;i--){
-    const pw = pipes[i].w || Math.max(44,W()*0.1);
-    pipes[i].x-=speed;
-    if(!pipes[i].passed&&pipes[i].x+pw<bird.x){
-      pipes[i].passed=true;
-      score+=PIPE_VALUE*level;
-      const passedCount=pipes.filter(p=>p.passed).length;
-      if(passedCount>0&&passedCount%5===0){
-        level=Math.min(level+1,MAX_LEVEL);
-        updateLevelStats();
+  const gh = GH();
+  const pw = PW();
+
+  if (bird.y+bird.r >= H()-gh || bird.y-bird.r <= 0) { die(); return; }
+
+  // Borular
+  for (let i=pipes.length-1; i>=0; i--) {
+    pipes[i].x -= speed;
+    if (!pipes[i].passed && pipes[i].x+pw < bird.x) {
+      pipes[i].passed = true;
+      score += PIPE_VAL * level;
+      const passed = pipes.filter(p=>p.passed).length;
+      if (passed > 0 && passed % 5 === 0) {
+        level = Math.min(level+1, MAX_LEVEL);
+        applyLevel();
       }
       updateHUD();
     }
-    const bx=bird.x,by=bird.y,br=bird.radius*0.7;
-    if(bx+br>pipes[i].x-5&&bx-br<pipes[i].x+pw+5){
-      if(by-br<pipes[i].topH||by+br>pipes[i].topH+gap){die();return;}
+    // Çarpma
+    const bx=bird.x, by=bird.y, br=bird.r*0.72;
+    if (bx+br > pipes[i].x-6 && bx-br < pipes[i].x+pw+6) {
+      if (by-br < pipes[i].topH || by+br > pipes[i].topH+gap) { die(); return; }
     }
-    if(pipes[i].x+pw<-10) pipes.splice(i,1);
+    if (pipes[i].x+pw < -10) pipes.splice(i,1);
   }
 
-  for(let i=coins.length-1;i>=0;i--){
-    coins[i].x-=speed;
-    if(!coins[i].collected){
+  // Altınlar
+  for (let i=coins.length-1; i>=0; i--) {
+    coins[i].x -= speed;
+    if (!coins[i].ok) {
       const dx=bird.x-coins[i].x, dy=bird.y-coins[i].y;
-      if(Math.sqrt(dx*dx+dy*dy)<bird.radius+COIN_R){
-        coins[i].collected=true; coinCount++;
-        score+=COIN_VALUE*level;
-        spawnCoinFX(coins[i].x,coins[i].y);
+      if (Math.sqrt(dx*dx+dy*dy) < bird.r+COIN_R) {
+        coins[i].ok = true;
+        coinCount++;
+        score += COIN_VAL * level;
+        fx(coins[i].x, coins[i].y, '#ffbe0b');
         updateHUD();
       }
     }
-    if(coins[i].x<-20) coins.splice(i,1);
+    if (coins[i].x < -20) coins.splice(i,1);
   }
 
-  const spawnRate=Math.max(45,120-level*4);
-  if(frameCount%spawnRate===0) addPipe();
+  // Boru spawn
+  const rate = Math.max(44, 128 - level*4);
+  if (frame % rate === 0) addPipe();
 }
 
-function die() {
-  bird.alive=false; gameRunning=false;
-  cancelAnimationFrame(animId);
-  lastScore=score; lastCoins=coinCount;
-  lastPipes=pipes.filter(p=>p.passed).length;
-  if(score>bestScore){
-    bestScore=score;
-    localStorage.setItem('fp_best_v3',bestScore);
-  }
-  document.getElementById('hud-bar').classList.remove('active');
-  if('ontouchstart'in window) document.getElementById('touch-controls').style.display='none';
+function updateHUD() {
+  document.getElementById('hud-score').textContent = score;
+  document.getElementById('hud-coins').textContent = `🪙 ${coinCount}`;
+  document.getElementById('hud-level').textContent = `SEVİYE ${level}`;
+  document.getElementById('hud-best').textContent  = `EN İYİ: ${best}`;
+}
 
-  const isTop=leaderboard.length<10||score>(leaderboard[leaderboard.length-1]?.score||0);
-  if(score>0&&isTop){
-    document.getElementById('name-score').textContent=score;
-    document.getElementById('name-overlay').classList.add('active');
-  } else showGameOver();
+// ── Loop ──────────────────────────────────
+function loop() {
+  update();
+  drawBg(); drawPipes(); drawCoins(); drawParticles(); drawGround(); drawBird();
+  if (running) animId = requestAnimationFrame(loop);
+}
+
+// ── Die ───────────────────────────────────
+function die() {
+  bird.alive = false; running = false;
+  cancelAnimationFrame(animId);
+  lastScore = score; lastCoins = coinCount;
+  lastPipes = pipes.filter(p=>p.passed).length;
+
+  if (score > best) {
+    best = score;
+    localStorage.setItem('fp_best_v4', best);
+  }
+
+  hideHUD();
+
+  const isTop = leaderboard.length < 10 || score > (leaderboard[leaderboard.length-1]?.score||0);
+  if (score > 0 && isTop) {
+    document.getElementById('name-score').textContent = score;
+    document.getElementById('ov-name').classList.add('show');
+  } else {
+    showGameOver();
+  }
 }
 
 function showGameOver() {
-  document.getElementById('final-score').textContent=lastScore;
-  document.getElementById('new-record').style.display=lastScore>=bestScore&&lastScore>0?'block':'none';
-  document.getElementById('score-breakdown').innerHTML=
-    `Boru: <span>${lastPipes}×${PIPE_VALUE}</span> Altın: <span>${lastCoins}×${COIN_VALUE}</span><br>`+
-    `Seviye: <span>${level}</span> Toplam: <span>${lastScore}</span>`;
-  renderLB('go-lb-list',leaderboard,5);
-  document.getElementById('gameover-overlay').classList.add('active');
+  document.getElementById('go-score').textContent = lastScore;
+  document.getElementById('go-record').style.display = lastScore >= best && lastScore > 0 ? 'block':'none';
+  document.getElementById('go-breakdown').innerHTML =
+    `Boru: <span>${lastPipes}×${PIPE_VAL}</span> &nbsp; Altın: <span>${lastCoins}×${COIN_VAL}</span><br>` +
+    `Seviye: <span>${level}</span> &nbsp; Toplam: <span>${lastScore}</span>`;
+  renderLB('lb-go', leaderboard, 5);
+  document.getElementById('ov-gameover').classList.add('show');
 }
 
-function loop() {
-  update(); drawBg();
-  pipes.forEach(drawPipe); coins.forEach(drawCoin);
-  drawParticles(); drawGround(); drawBird();
-  if(gameRunning) animId=requestAnimationFrame(loop);
+// ── Ekran yönetimi ─────────────────────────
+function showGame() {
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  document.getElementById('hud').style.display  = 'flex';
+  if ('ontouchstart' in window) document.getElementById('tap-btn').style.display = 'block';
 }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function hideHUD() {
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('tap-btn').style.display = 'none';
 }
 
+function showMenu() {
+  document.getElementById('ov-gameover').classList.remove('show');
+  document.getElementById('ov-name').classList.remove('show');
+  document.getElementById('game').style.display = 'none';
+  hideHUD();
+  document.getElementById('menu').style.display = 'flex';
+  renderLB('lb-menu', leaderboard, 10);
+}
+
+// ── Start ─────────────────────────────────
 function startGame() {
-  initBird(); pipes=[]; coins=[]; particles=[];
-  score=0; coinCount=0; level=1; frameCount=0;
-  updateLevelStats(); gameRunning=true;
   resizeCanvas();
-  document.getElementById('gameover-overlay').classList.remove('active');
-  document.getElementById('name-overlay').classList.remove('active');
-  showScreen('game-screen');
-  document.getElementById('hud-bar').classList.add('active');
-  if('ontouchstart'in window) document.getElementById('touch-controls').style.display='flex';
+  initBird();
+  pipes=[]; coins=[]; particles=[];
+  score=0; coinCount=0; level=1; frame=0;
+  applyLevel(); running=true;
+  document.getElementById('ov-gameover').classList.remove('show');
+  document.getElementById('ov-name').classList.remove('show');
+  showGame();
   updateHUD();
   addPipe();
-  if(animId) cancelAnimationFrame(animId);
-  animId=requestAnimationFrame(loop);
+  if (animId) cancelAnimationFrame(animId);
+  animId = requestAnimationFrame(loop);
 }
 
-function goToMenu() {
-  gameRunning=false;
-  if(animId) cancelAnimationFrame(animId);
-  document.getElementById('gameover-overlay').classList.remove('active');
-  document.getElementById('name-overlay').classList.remove('active');
-  document.getElementById('hud-bar').classList.remove('active');
-  if('ontouchstart'in window) document.getElementById('touch-controls').style.display='none';
-  showScreen('menu-screen');
-}
+function jump() { if (running) bird.vy = jumpF; }
 
-function jump(){if(gameRunning) bird.vy=jumpForce;}
-
-document.addEventListener('keydown',e=>{
-  if(e.code==='Space'){e.preventDefault();jump();}
-  if(e.code==='Escape') goToMenu();
+// ── Events ────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); jump(); }
 });
-canvas.addEventListener('click',jump);
-canvas.addEventListener('touchstart',e=>{e.preventDefault();jump();},{passive:false});
-document.getElementById('tap-btn').addEventListener('touchstart',e=>{e.preventDefault();jump();},{passive:false});
-document.getElementById('tap-btn').addEventListener('click',jump);
-document.getElementById('start-btn').addEventListener('click',startGame);
-document.getElementById('restart-btn').addEventListener('click',startGame);
-document.getElementById('menu-btn').addEventListener('click',goToMenu);
-document.getElementById('name-submit').addEventListener('click',submitName);
-document.getElementById('name-input').addEventListener('keydown',e=>{if(e.key==='Enter')submitName();});
 
-function submitName(){
-  const name=document.getElementById('name-input').value.trim();
-  if(!name){document.getElementById('name-input').focus();return;}
-  saveScore(name,lastScore);
-  document.getElementById('name-input').value='';
-  document.getElementById('name-overlay').classList.remove('active');
+canvas.addEventListener('click', jump);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); jump(); }, { passive:false });
+
+document.getElementById('tap-btn').addEventListener('touchstart', e => { e.preventDefault(); jump(); }, { passive:false });
+document.getElementById('tap-btn').addEventListener('click', jump);
+
+document.getElementById('start-btn').addEventListener('click', startGame);
+document.getElementById('btn-restart').addEventListener('click', startGame);
+document.getElementById('btn-menu').addEventListener('click', showMenu);
+
+document.getElementById('btn-name-save').addEventListener('click', saveName);
+document.getElementById('name-input').addEventListener('keydown', e => { if(e.key==='Enter') saveName(); });
+
+function saveName() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) { document.getElementById('name-input').focus(); return; }
+  saveScore(name, lastScore);
+  document.getElementById('name-input').value = '';
+  document.getElementById('ov-name').classList.remove('show');
   showGameOver();
 }
 
-if('ontouchstart'in window){
-  document.getElementById('touch-controls').style.display='none';
-}
+window.addEventListener('resize', () => { if (running) resizeCanvas(); });
 </script>
 </body>
 </html>
