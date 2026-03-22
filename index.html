@@ -26,14 +26,14 @@
   .char-btn:active{transform:scale(0.9);}
   .char-btn.selected{border-color:var(--yellow);box-shadow:0 0 16px rgba(255,190,11,0.5);background:rgba(255,190,11,0.1);}
   .menu-lb{width:100%;max-width:360px;background:rgba(255,0,110,0.06);border:1px solid rgba(255,0,110,0.2);border-radius:6px;padding:12px;}
-  .menu-lb h3{font-size:clamp(0.38rem,1.8vw,0.52rem);color:var(--yellow);text-shadow:0 0 8px var(--yellow);text-align:center;margin-bottom:10px;}
-  .lb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;margin-bottom:4px;background:rgba(255,255,255,0.03);border-radius:3px;gap:4px;}
+  .menu-lb h3{font-size:clamp(0.35rem,1.6vw,0.48rem);color:var(--yellow);text-shadow:0 0 8px var(--yellow);text-align:center;margin-bottom:10px;}
+  .lb-row{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;margin-bottom:4px;background:rgba(255,255,255,0.03);border-radius:3px;gap:4px;}
   .lb-rank{font-size:clamp(0.26rem,1.3vw,0.35rem);min-width:20px;color:var(--dim);}
   .lb-rank.g{color:var(--yellow);text-shadow:0 0 5px var(--yellow);}
   .lb-rank.s{color:#aaaacc;}
   .lb-rank.b{color:#cc8844;}
   .lb-name{font-size:clamp(0.26rem,1.3vw,0.35rem);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .lb-lv{font-size:clamp(0.24rem,1.2vw,0.32rem);color:var(--green);text-shadow:0 0 4px var(--green);white-space:nowrap;}
+  .lb-lv{font-size:clamp(0.24rem,1.2vw,0.32rem);color:var(--green);text-shadow:0 0 4px var(--green);white-space:nowrap;margin:0 4px;}
   .lb-score{font-size:clamp(0.24rem,1.2vw,0.32rem);color:var(--pink);text-shadow:0 0 4px var(--pink);}
   .lb-empty{font-size:clamp(0.26rem,1.2vw,0.35rem);color:var(--dim);text-align:center;padding:8px;}
   #game{display:none;position:fixed;inset:0;z-index:10;}
@@ -41,7 +41,7 @@
   .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:600;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;backdrop-filter:blur(4px);}
   .overlay.show{display:flex;}
   .overlay h2{font-family:'Orbitron',monospace;font-size:clamp(0.9rem,4vw,1.6rem);color:var(--pink);text-shadow:0 0 20px var(--pink);text-align:center;}
-  .score-big{font-size:clamp(1.1rem,5.5vw,1.8rem);color:var(--yellow);text-shadow:0 0 14px var(--yellow);}
+  .score-big{font-size:clamp(1rem,5vw,1.6rem);color:var(--yellow);text-shadow:0 0 14px var(--yellow);}
   .new-rec{font-size:clamp(0.36rem,1.7vw,0.5rem);color:var(--green);text-shadow:0 0 10px var(--green);animation:glow-btn 1s infinite;}
   .breakdown{font-size:clamp(0.26rem,1.3vw,0.36rem);color:var(--dim);text-align:center;line-height:2.4;background:rgba(255,255,255,0.03);border-radius:4px;padding:10px 14px;border:1px solid rgba(255,255,255,0.05);width:100%;max-width:280px;}
   .breakdown span{color:var(--yellow);}
@@ -83,11 +83,12 @@
 </div>
 
 <div class="overlay" id="ov-name">
-  <h2>🏆 REKOR!</h2>
+  <h2>🏆 OYUN BİTTİ</h2>
   <div class="score-big" id="name-sc">0</div>
-  <p style="font-size:clamp(0.3rem,1.4vw,0.42rem);color:var(--dim);">İsmin nedir?</p>
+  <p style="font-size:clamp(0.3rem,1.4vw,0.42rem);color:var(--dim);text-align:center;">Skoru kaydetmek için<br>isminizi girin:</p>
   <input class="name-input" id="name-inp" maxlength="10" placeholder="İSMİNİ YAZ" autocomplete="off"/>
   <button class="ov-btn" id="btn-save">KAYDET ▶</button>
+  <button class="ov-btn green" id="btn-skip">ATLA</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -102,40 +103,46 @@ firebase.initializeApp({
   messagingSenderId:"995587188702",
   appId:"1:995587188702:web:e0042cb45d617b47ef9f4f"
 });
-const db=firebase.database();
-// ✅ Temiz yeni path — seviye + skor birlikte
-const REF=db.ref('fp_final');
-let LB=[];
 
-REF.on('value',snap=>{
-  const all=[];
-  snap.forEach(c=>all.push(c.val()));
-  // Seviyeye göre sırala, eşit seviyede skora göre
-  all.sort((a,b)=>b.level!==a.level ? b.level-a.level : b.score-a.score);
-  // Her isimden sadece en iyisini al
-  const seen={};
-  LB=[];
-  all.forEach(r=>{
-    if(!seen[r.name]){seen[r.name]=true;LB.push(r);}
+const db = firebase.database();
+const REF = db.ref('fp_scores');
+let LB = [];
+
+// ✅ Tüm skorları çek, isim başına en iyiyi al, seviyeye göre sırala
+REF.on('value', snap => {
+  const all = {};
+  snap.forEach(child => {
+    const d = child.val();
+    const key = d.name;
+    // Her isim için en yüksek seviyeyi, eşitse en yüksek skoru tut
+    if (!all[key] ||
+        d.level > all[key].level ||
+        (d.level === all[key].level && d.score > all[key].score)) {
+      all[key] = d;
+    }
   });
-  LB=LB.slice(0,10);
-  renderLB('lb-menu',LB,10);
+  // Objeyi diziye çevir, sırala
+  LB = Object.values(all)
+    .sort((a,b) => b.level !== a.level ? b.level - a.level : b.score - a.score)
+    .slice(0, 10);
+  renderLB('lb-menu', LB, 10);
 });
 
-function saveSc(name,score,level){
+function saveSc(name, score, level) {
   REF.push({
-    name:name.toUpperCase().slice(0,10),
+    name: name.toUpperCase().trim().slice(0,10),
     score,
     level,
-    date:Date.now()
+    date: Date.now()
   });
 }
 
-function renderLB(id,data,max){
-  const el=document.getElementById(id);if(!el)return;
-  if(!data.length){el.innerHTML='<div class="lb-empty">Henüz skor yok</div>';return;}
-  const M=['🥇','🥈','🥉'],C=['g','s','b'];
-  el.innerHTML=data.slice(0,max).map((r,i)=>`
+function renderLB(id, data, max) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!data.length) { el.innerHTML = '<div class="lb-empty">Henüz skor yok!</div>'; return; }
+  const M = ['🥇','🥈','🥉'], C = ['g','s','b'];
+  el.innerHTML = data.slice(0, max).map((r, i) => `
     <div class="lb-row">
       <span class="lb-rank ${C[i]||''}">${M[i]||i+1}</span>
       <span class="lb-name">${r.name}</span>
@@ -145,58 +152,56 @@ function renderLB(id,data,max){
 }
 
 // Karakterler
-const CHARS=[
-  {emoji:'🐆',name:'Pars',glow:'#ffbe0b'},
-  {emoji:'🚀',name:'Roket',glow:'#00f5ff'},
-  {emoji:'🛸',name:'UFO',glow:'#cc00ff'},
-  {emoji:'⭐',name:'Yıldız',glow:'#ffbe0b'},
-  {emoji:'🦋',name:'Kelebek',glow:'#ff006e'},
-  {emoji:'🐉',name:'Ejderha',glow:'#00ff88'},
-  {emoji:'🔥',name:'Ateş',glow:'#ff4400'},
-  {emoji:'🌙',name:'Ay',glow:'#aaaaff'},
+const CHARS = [
+  {emoji:'🐆', glow:'#ffbe0b'},
+  {emoji:'🚀', glow:'#00f5ff'},
+  {emoji:'🛸', glow:'#cc00ff'},
+  {emoji:'⭐', glow:'#ffbe0b'},
+'  {emoemoj🌎', glow:'#00ff88'},
+  {emoji:'🧌', glow:'#ff4400'},
+  {emoji:'🌙', glow:'#aaaaff'},
 ];
-let selectedChar=0;
-
-const charGrid=document.getElementById('char-grid');
-CHARS.forEach((c,i)=>{
-  const btn=document.createElement('button');
-  btn.className='char-btn'+(i===0?' selected':'');
-  btn.textContent=c.emoji;
-  btn.onclick=()=>{
-    selectedChar=i;
-    document.querySelectorAll('.char-btn').forEach((b,j)=>b.classList.toggle('selected',j===i));
+let selectedChar = 0;
+const charGrid = document.getElementById('char-grid');
+CHARS.forEach((c,i) => {
+  const btn = document.createElement('button');
+  btn.className = 'char-btn' + (i===0?' selected':'');
+  btn.textContent = c.emoji;
+  btn.onclick = () => {
+    selectedChar = i;
+    document.querySelectorAll('.char-btn').forEach((b,j) => b.classList.toggle('selected', j===i));
   };
   charGrid.appendChild(btn);
 });
 
 // Canvas
-const CV=document.getElementById('game-canvas');
-const CX=CV.getContext('2d');
-const W=window.innerWidth,H=window.innerHeight;
-CV.width=W;CV.height=H;
-CV.style.width=W+'px';CV.style.height=H+'px';
+const CV = document.getElementById('game-canvas');
+const CX = CV.getContext('2d');
+const W = window.innerWidth, H = window.innerHeight;
+CV.width = W; CV.height = H;
+CV.style.width = W+'px'; CV.style.height = H+'px';
 
-const PIPE_W=Math.floor(W*0.18);
-const BIRD_R=Math.floor(W*0.07);
-const COIN_R=Math.floor(W*0.03);
-const GROUND_H=Math.floor(H*0.06);
-const MAX_LV=20;
-const PIPE_V=10,COIN_V=5;
-const GR_S=0.14,GR_M=0.40;
-const JP_S=-5.0,JP_M=-7.4;
-const SP_S=1.5,SP_M=5.5;
-const GA_S=H*0.42,GA_M=H*0.25;
-const DIST_S=W*0.60,DIST_M=W*0.42;
+const PIPE_W = Math.floor(W*0.18);
+const BIRD_R = Math.floor(W*0.07);
+const COIN_R = Math.floor(W*0.03);
+const GROUND_H = Math.floor(H*0.06);
+const MAX_LV = 20;
+const PIPE_V = 10, COIN_V = 5;
+const GR_S=0.14, GR_M=0.40;
+const JP_S=-5.0, JP_M=-7.4;
+const SP_S=1.5, SP_M=5.5;
+const GA_S=H*0.42, GA_M=H*0.25;
+const DIST_S=W*0.60, DIST_M=W*0.42;
 
-let bird,pipes,coins,parts;
-let score,coins_n,lv,sp,gr,jp;
-let run,aid,frm,pipesPassed;
-let lscore,lcoins,lpipes,llevel;
-let best=parseInt(localStorage.getItem('fp_best')||'0');
+let bird, pipes, coins, parts;
+let score, coins_n, lv, sp, gr, jp;
+let run, aid, frm, pipesPassed;
+let lscore, lcoins, lpipes, llevel;
+let best = parseInt(localStorage.getItem('fp_best')||'0');
 
-const STARS=Array.from({length:80},()=>({
-  x:Math.random()*W,y:Math.random()*H,
-  r:Math.random()*1.6+0.4,a:Math.random(),da:0.003+Math.random()*0.01
+const STARS = Array.from({length:80}, () => ({
+  x:Math.random()*W, y:Math.random()*H,
+  r:Math.random()*1.6+0.4, a:Math.random(), da:0.003+Math.random()*0.01
 }));
 
 function lvv(s,m,l){return s+(m-s)*Math.min((l-1)/(MAX_LV-1),1);}
@@ -364,15 +369,13 @@ function die(){
   bird.alive=false;run=false;cancelAnimationFrame(aid);
   lscore=score;lcoins=coins_n;lpipes=pipesPassed;llevel=lv;
   if(score>best){best=score;localStorage.setItem('fp_best',best);}
-  // Her zaman kaydet — seviye veya skor önemli
-  if(score>0){
-    document.getElementById('name-sc').textContent=`Lv${lv} — ${score} puan`;
-    document.getElementById('ov-name').classList.add('show');
-  } else showGO();
+  // Her zaman isim sor
+  document.getElementById('name-sc').textContent=`Lv${lv} — ${score} puan`;
+  document.getElementById('ov-name').classList.add('show');
 }
 
 function showGO(){
-  document.getElementById('go-score').textContent=lscore;
+  document.getElementById('go-score').textContent=`Lv${llevel} — ${lscore} puan`;
   document.getElementById('go-rec').style.display=lscore>=best&&lscore>0?'block':'none';
   document.getElementById('go-bd').innerHTML=
     `Boru: <span>${lpipes}×${PIPE_V}</span> Altın: <span>${lcoins}×${COIN_V}</span><br>`+
@@ -414,6 +417,10 @@ document.getElementById('start-btn').addEventListener('click',startGame);
 document.getElementById('btn-restart').addEventListener('click',startGame);
 document.getElementById('btn-menu').addEventListener('click',showMenu);
 document.getElementById('btn-save').addEventListener('click',saveN);
+document.getElementById('btn-skip').addEventListener('click',()=>{
+  document.getElementById('ov-name').classList.remove('show');
+  showGO();
+});
 document.getElementById('name-inp').addEventListener('keydown',e=>{if(e.key==='Enter')saveN();});
 
 function saveN(){
