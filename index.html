@@ -17,8 +17,6 @@ body::before {
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);
   pointer-events:none; z-index:1000;
 }
-
-/* MENÜ */
 #menu {
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
@@ -31,27 +29,14 @@ body::before {
 }
 .t1{color:#ffbe0b;text-shadow:0 0 15px #ffbe0b,0 0 40px #ffbe0b;}
 .t2{color:#ff006e;text-shadow:0 0 15px #ff006e,0 0 40px #ff006e;}
-.pars-big { font-size:clamp(3.5rem,12vw,6rem); animation:bounce 1.2s ease-in-out infinite; filter:drop-shadow(0 0 20px rgba(255,190,11,0.9)); }
+.pars-big{font-size:clamp(3.5rem,12vw,6rem);animation:bounce 1.2s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(255,190,11,0.9));}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
-
-.start-btn {
-  background:transparent; border:2px solid #ff006e; color:#ff006e;
-  font-family:'Press Start 2P',monospace; font-size:clamp(0.6rem,2.5vw,0.85rem);
-  padding:16px 28px; cursor:pointer; letter-spacing:0.15em;
-  text-shadow:0 0 10px #ff006e; border-radius:4px;
-  animation:glow 2s infinite; width:100%; max-width:320px;
-}
+.start-btn{background:transparent;border:2px solid #ff006e;color:#ff006e;font-family:'Press Start 2P',monospace;font-size:clamp(0.6rem,2.5vw,0.85rem);padding:16px 28px;cursor:pointer;letter-spacing:0.15em;text-shadow:0 0 10px #ff006e;border-radius:4px;animation:glow 2s infinite;width:100%;max-width:320px;}
 @keyframes glow{0%,100%{box-shadow:0 0 10px rgba(255,0,110,0.3)}50%{box-shadow:0 0 32px rgba(255,0,110,0.7)}}
 .start-btn:active{background:rgba(255,0,110,0.2);transform:scale(0.97);}
-
-.menu-lb {
-  width:100%; max-width:380px;
-  background:rgba(255,0,110,0.06);
-  border:1px solid rgba(255,0,110,0.2);
-  border-radius:6px; padding:14px;
-}
-.menu-lb h3 { font-size:clamp(0.4rem,1.8vw,0.55rem); color:#ffbe0b; text-shadow:0 0 8px #ffbe0b; text-align:center; margin-bottom:12px; letter-spacing:0.1em; }
-.lb-row { display:flex; justify-content:space-between; align-items:center; padding:6px 10px; margin-bottom:4px; background:rgba(255,255,255,0.03); border-radius:3px; gap:8px; }
+.menu-lb{width:100%;max-width:380px;background:rgba(255,0,110,0.06);border:1px solid rgba(255,0,110,0.2);border-radius:6px;padding:14px;}
+.menu-lb h3{font-size:clamp(0.4rem,1.8vw,0.55rem);color:#ffbe0b;text-shadow:0 0 8px #ffbe0b;text-align:center;margin-bottom:12px;letter-spacing:0.1em;}
+.lb-row{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;margin-bottom:4px;background:rgba(255,255,255,0.03);border-radius:3px;gap:8px;}
 .lb-rank{font-size:clamp(0.3rem,1.5vw,0.42rem);min-width:24px;color:#4a4a6a;}
 .lb-rank.g{color:#ffbe0b;text-shadow:0 0 6px #ffbe0b;}
 .lb-rank.s{color:#aaaacc;}
@@ -59,44 +44,17 @@ body::before {
 .lb-name{font-size:clamp(0.3rem,1.5vw,0.42rem);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d0d0ff;}
 .lb-score{font-size:clamp(0.3rem,1.5vw,0.42rem);color:#ff006e;text-shadow:0 0 4px #ff006e;}
 .lb-empty{font-size:clamp(0.28rem,1.3vw,0.38rem);color:#4a4a6a;text-align:center;padding:10px;}
-
-/* OYUN */
-#game { display:none; position:fixed; inset:0; }
-#game-canvas { display:block; width:100%; height:100%; }
-
-/* HUD */
-#hud {
-  display:none; position:fixed; top:0; left:0; right:0;
-  padding:10px 16px; background:rgba(0,0,0,0.6);
-  backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,0,110,0.2);
-  z-index:500; flex-direction:row; align-items:center; justify-content:space-between;
-}
-.hud-left{display:flex;flex-direction:column;gap:5px;}
-.hud-coins{font-size:clamp(0.45rem,2.2vw,0.65rem);color:#ffbe0b;text-shadow:0 0 8px #ffbe0b;}
-.hud-level{font-size:clamp(0.4rem,2vw,0.58rem);color:#ff006e;text-shadow:0 0 6px #ff006e;}
-.hud-score{font-size:clamp(0.9rem,4vw,1.4rem);color:#ffbe0b;text-shadow:0 0 12px #ffbe0b;}
-.hud-best{font-size:clamp(0.35rem,1.8vw,0.5rem);color:#4a4a6a;text-align:right;}
-
-/* TAP BUTONU */
-#tap-btn {
-  display:none; position:fixed; bottom:24px;
-  left:50%; transform:translateX(-50%);
-  width:86%; max-width:420px; padding:22px;
-  background:rgba(255,0,110,0.12); border:2px solid rgba(255,0,110,0.5);
-  color:#ff006e; font-family:'Press Start 2P',monospace;
-  font-size:clamp(0.7rem,3vw,0.95rem);
-  border-radius:14px; cursor:pointer; text-shadow:0 0 8px #ff006e;
-  touch-action:manipulation; user-select:none; -webkit-user-select:none; z-index:500;
-}
+#game{display:none;position:fixed;inset:0;}
+#game-canvas{display:block;width:100%;height:100%;}
+#hud{display:none;position:fixed;top:0;left:0;right:0;padding:8px 14px;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,0,110,0.2);z-index:500;flex-direction:row;align-items:center;justify-content:space-between;}
+.hud-left{display:flex;flex-direction:column;gap:4px;}
+.hud-coins{font-size:clamp(0.42rem,2vw,0.6rem);color:#ffbe0b;text-shadow:0 0 8px #ffbe0b;}
+.hud-level{font-size:clamp(0.38rem,1.8vw,0.54rem);color:#ff006e;text-shadow:0 0 6px #ff006e;}
+.hud-score{font-size:clamp(0.85rem,4vw,1.3rem);color:#ffbe0b;text-shadow:0 0 12px #ffbe0b;}
+.hud-best{font-size:clamp(0.32rem,1.5vw,0.46rem);color:#4a4a6a;text-align:right;}
+#tap-btn{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);width:86%;max-width:420px;padding:20px;background:rgba(255,0,110,0.12);border:2px solid rgba(255,0,110,0.5);color:#ff006e;font-family:'Press Start 2P',monospace;font-size:clamp(0.7rem,3vw,0.95rem);border-radius:14px;cursor:pointer;text-shadow:0 0 8px #ff006e;touch-action:manipulation;user-select:none;-webkit-user-select:none;z-index:500;}
 #tap-btn:active{background:rgba(255,0,110,0.3);transform:translateX(-50%) scale(0.96);}
-
-/* OVERLAY */
-.overlay {
-  display:none; position:fixed; inset:0;
-  background:rgba(0,0,0,0.9); z-index:600;
-  flex-direction:column; align-items:center; justify-content:center;
-  gap:12px; padding:24px; backdrop-filter:blur(5px);
-}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:600;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;backdrop-filter:blur(5px);}
 .overlay.show{display:flex;}
 .overlay h2{font-family:'Orbitron',monospace;font-size:clamp(1rem,4.5vw,1.8rem);color:#ff006e;text-shadow:0 0 20px #ff006e;text-align:center;}
 .score-big{font-size:clamp(1.2rem,6vw,2rem);color:#ffbe0b;text-shadow:0 0 16px #ffbe0b;}
@@ -111,12 +69,11 @@ body::before {
 .ov-btn.green{border-color:#00ff88;color:#00ff88;text-shadow:0 0 8px #00ff88;}
 .name-input{background:rgba(255,0,110,0.08);border:1px solid rgba(255,0,110,0.4);color:#ff006e;font-family:'Press Start 2P',monospace;font-size:clamp(0.45rem,2vw,0.62rem);padding:13px 16px;border-radius:3px;text-align:center;width:100%;max-width:280px;letter-spacing:0.1em;outline:none;}
 .name-input::placeholder{color:#4a4a6a;}
-.name-input:focus{border-color:rgba(255,0,110,0.8);box-shadow:0 0 14px rgba(255,0,110,0.3);}
+.name-input:focus{border-color:rgba(255,0,110,0.8);}
 </style>
 </head>
 <body>
 
-<!-- MENÜ -->
 <div id="menu">
   <h1><span class="t1">FLAPPY</span> <span class="t2">PARS</span></h1>
   <div class="pars-big">🐆</div>
@@ -130,10 +87,8 @@ body::before {
   </div>
 </div>
 
-<!-- OYUN -->
 <div id="game"><canvas id="game-canvas"></canvas></div>
 
-<!-- HUD -->
 <div id="hud">
   <div class="hud-left">
     <div class="hud-coins" id="hud-coins">🪙 0</div>
@@ -145,7 +100,6 @@ body::before {
 
 <button id="tap-btn">🐆 ZIPLA!</button>
 
-<!-- OYUN SONU -->
 <div class="overlay" id="ov-go">
   <h2>OYUN BİTTİ</h2>
   <div class="score-big" id="go-score">0</div>
@@ -156,7 +110,6 @@ body::before {
   <button class="ov-btn green" id="btn-menu">ANA MENÜ</button>
 </div>
 
-<!-- İSİM -->
 <div class="overlay" id="ov-name">
   <h2>🏆 YENİ REKOR!</h2>
   <div class="score-big" id="name-sc">0</div>
@@ -206,90 +159,71 @@ function renderLB(id, data, max) {
     </div>`).join('');
 }
 
-// ── CANVAS ──────────────────────────────
 const CV = document.getElementById('game-canvas');
 const CX = CV.getContext('2d');
 
 function W(){ return window.innerWidth; }
 function H(){ return window.innerHeight; }
+function resize(){ CV.width=W(); CV.height=H(); }
 
-function resize(){
-  CV.width  = W();
-  CV.height = H();
-}
-
-// ── SABİTLER ────────────────────────────
+// ── SABİTLER ──
+// Boru genişliği sabit piksel — çok dar olmayacak
+const PIPE_W = 60;
+// Pars boyutu — ekrana göre ama makul
+function BIRD_SIZE(){ return Math.min(W(), H()) * 0.09; }
+// Altın boyutu
+function COIN_R(){ return Math.min(W(), H()) * 0.022; }
+// Zemin yüksekliği
+function GH(){ return Math.max(40, H() * 0.07); }
+// Başlangıç boşluğu çok geniş
+const GA_S = 280, GA_M = 130;
 const MAX_LV = 20;
-const PIPE_V = 10;
-const COIN_V = 5;
-
-// Yerçekimi - başta çok hafif
-const GR_S = 0.13, GR_M = 0.37;
-// Zıplama - başta kısa
-const JP_S = -4.5, JP_M = -7.0;
-// Hız - başta çok yavaş
-const SP_S = 1.1, SP_M = 3.6;
-// Boşluk - başta çok geniş
-const GA_S = 230, GA_M = 115;
+const PIPE_V = 10, COIN_V = 5;
+const GR_S=0.13, GR_M=0.38;
+const JP_S=-4.8, JP_M=-7.2;
+const SP_S=1.1, SP_M=3.5;
 
 let bird, pipes, coins, parts;
 let score, coins_n, lv, sp, ga, gr, jp;
 let run, aid, frm;
 let lscore, lcoins, lpipes;
-let best = parseInt(localStorage.getItem('fp5')||'0');
+let best = parseInt(localStorage.getItem('fp6')||'0');
 
 const STARS = Array.from({length:120},()=>({
   x:Math.random()*3000, y:Math.random()*3000,
-  r:Math.random()*2+0.3, a:Math.random(), da:0.003+Math.random()*0.01
+  r:Math.random()*1.8+0.4, a:Math.random(), da:0.003+Math.random()*0.01
 }));
 
-function lv_val(s, m, l){
-  return s + (m-s)*Math.min((l-1)/(MAX_LV-1),1);
-}
+function lvv(s,m,l){ return s+(m-s)*Math.min((l-1)/(MAX_LV-1),1); }
+function applyLv(){ sp=lvv(SP_S,SP_M,lv); ga=lvv(GA_S,GA_M,lv); gr=lvv(GR_S,GR_M,lv); jp=lvv(JP_S,JP_M,lv); }
 
-function applyLv(){
-  sp = lv_val(SP_S, SP_M, lv);
-  ga = lv_val(GA_S, GA_M, lv);
-  gr = lv_val(GR_S, GR_M, lv);
-  jp = lv_val(JP_S, JP_M, lv);
-}
-
-// Boru genişliği ekrana göre
-function PW(){ return Math.max(52, W()*0.13); }
-// Zemin yüksekliği
-function GH(){ return Math.max(36, H()*0.06); }
-// Kuş yarıçapı ekrana göre
-function BR(){ return Math.max(20, Math.min(W(), H())*0.055); }
-// Altın yarıçapı
-function CR(){ return Math.max(12, Math.min(W(),H())*0.025); }
-
-function initBird(){
-  bird = { x:W()*0.22, y:H()*0.45, vy:0, alive:true };
-}
+function initBird(){ bird={x:W()*0.2, y:H()*0.45, vy:0, alive:true}; }
 
 function addPipe(){
-  const pw = PW(), gh = GH();
-  const topH = gh + 60 + Math.random()*(H()-ga-gh-120);
-  pipes.push({ x:W()+pw, topH, passed:false });
-  const mid = topH+ga/2, sp2 = W()*0.16;
+  const gh=GH();
+  // Borunun üst kısmı — zemin ve tavan boşluğu bırak
+  const minTop = gh + 30;
+  const maxTop = H() - ga - gh - 30;
+  const topH = minTop + Math.random() * Math.max(10, maxTop - minTop);
+  pipes.push({ x:W()+PIPE_W, topH, passed:false });
+  const mid = topH + ga/2;
+  const sp2 = W() * 0.15;
   for(let i=0;i<3;i++){
     coins.push({
-      x: W()+pw+28+sp2*i+Math.random()*20,
-      y: mid+(Math.random()-0.5)*ga*0.5,
+      x: W()+PIPE_W+20+sp2*i+Math.random()*18,
+      y: mid+(Math.random()-0.5)*ga*0.45,
       ok:false, a:Math.random()*Math.PI*2
     });
   }
 }
 
 function fx(x,y,col){
-  for(let i=0;i<14;i++){
-    const ang=(Math.PI*2/14)*i, s=2+Math.random()*3.5;
-    parts.push({x,y,vx:Math.cos(ang)*s,vy:Math.sin(ang)*s-1.5,
-      life:1,decay:0.045+Math.random()*0.03,col,sz:2.5+Math.random()*4});
+  for(let i=0;i<12;i++){
+    const ang=(Math.PI*2/12)*i, s=2+Math.random()*4;
+    parts.push({x,y,vx:Math.cos(ang)*s,vy:Math.sin(ang)*s-1.5,life:1,decay:0.045+Math.random()*0.03,col,sz:2.5+Math.random()*4});
   }
 }
 
-// ── ÇİZİM ─────────────────────────────
 function drawBg(){
   const g=CX.createLinearGradient(0,0,0,H());
   g.addColorStop(0,'#080318'); g.addColorStop(0.65,'#0c1028'); g.addColorStop(1,'#091520');
@@ -308,33 +242,33 @@ function drawGround(){
   CX.strokeStyle='#00ff88'; CX.lineWidth=2.5;
   CX.beginPath(); CX.moveTo(0,H()-gh); CX.lineTo(W(),H()-gh); CX.stroke();
   CX.strokeStyle='rgba(0,255,136,0.1)'; CX.lineWidth=1;
-  const step=Math.max(40,W()*0.06);
+  const step=50;
   for(let x=(frm*sp)%step;x<W();x+=step){
     CX.beginPath(); CX.moveTo(x,H()-gh); CX.lineTo(x+step/2,H()); CX.stroke();
   }
 }
 
 function drawPipes(){
-  const pw=PW();
   pipes.forEach(p=>{
-    const g2=CX.createLinearGradient(p.x,0,p.x+pw,0);
-    g2.addColorStop(0,'#004d1a'); g2.addColorStop(0.45,'#00bb44'); g2.addColorStop(1,'#002e10');
-    CX.shadowColor='#00ff55'; CX.shadowBlur=12;
+    const g2=CX.createLinearGradient(p.x,0,p.x+PIPE_W,0);
+    g2.addColorStop(0,'#004d1a'); g2.addColorStop(0.5,'#00cc44'); g2.addColorStop(1,'#002e10');
+    CX.shadowColor='#00ff55'; CX.shadowBlur=14;
     CX.fillStyle=g2;
-    const cap=Math.max(8, pw*0.15);
-    // Üst boru
-    CX.fillRect(p.x, 0, pw, p.topH);
-    CX.fillRect(p.x-cap, p.topH-cap*2, pw+cap*2, cap*2);
+    const cap=10;
+    // Üst boru — sadece topH kadar uzun
+    CX.fillRect(p.x, 0, PIPE_W, p.topH);
+    CX.fillRect(p.x-cap, p.topH-cap*2.5, PIPE_W+cap*2, cap*2.5);
     // Alt boru
     const by=p.topH+ga;
-    CX.fillRect(p.x, by, pw, H()-by-GH());
-    CX.fillRect(p.x-cap, by, pw+cap*2, cap*2);
+    const gh=GH();
+    CX.fillRect(p.x, by, PIPE_W, H()-by-gh);
+    CX.fillRect(p.x-cap, by, PIPE_W+cap*2, cap*2.5);
     CX.shadowBlur=0;
   });
 }
 
 function drawCoins(){
-  const cr=CR();
+  const cr=COIN_R();
   coins.forEach(c=>{
     if(c.ok) return;
     c.a+=0.09;
@@ -364,29 +298,30 @@ function drawParts(){
 }
 
 function drawBird(){
-  const br=BR();
+  const sz=BIRD_SIZE();
   CX.save();
   CX.translate(bird.x, bird.y);
   CX.rotate(Math.max(-0.5, Math.min(Math.PI/2, bird.vy*0.065)));
   CX.shadowColor='#ffbe0b'; CX.shadowBlur=28;
-  CX.font=`${br*2}px serif`;
+  CX.font=`${sz*2}px serif`;
   CX.textAlign='center'; CX.textBaseline='middle';
   CX.fillText('🐆',0,0);
   CX.shadowBlur=0; CX.restore();
 }
 
-// ── GÜNCELLEME ─────────────────────────
 function update(){
   if(!bird.alive) return;
   frm++;
   bird.vy+=gr; bird.y+=bird.vy;
-  const gh=GH(), pw=PW(), br=BR()*0.72, cr=CR();
+  const gh=GH();
+  const br=BIRD_SIZE()*0.7;
+  const cr=COIN_R();
 
   if(bird.y+br>=H()-gh || bird.y-br<=0){die();return;}
 
   for(let i=pipes.length-1;i>=0;i--){
     pipes[i].x-=sp;
-    if(!pipes[i].passed && pipes[i].x+pw<bird.x){
+    if(!pipes[i].passed && pipes[i].x+PIPE_W<bird.x){
       pipes[i].passed=true;
       score+=PIPE_V*lv;
       const pc=pipes.filter(p=>p.passed).length;
@@ -396,11 +331,11 @@ function update(){
       }
       updHUD();
     }
-    const cap=Math.max(8,pw*0.15);
-    if(bird.x+br>pipes[i].x-cap && bird.x-br<pipes[i].x+pw+cap){
+    const cap=10;
+    if(bird.x+br>pipes[i].x-cap && bird.x-br<pipes[i].x+PIPE_W+cap){
       if(bird.y-br<pipes[i].topH || bird.y+br>pipes[i].topH+ga){die();return;}
     }
-    if(pipes[i].x+pw<-10) pipes.splice(i,1);
+    if(pipes[i].x+PIPE_W<-10) pipes.splice(i,1);
   }
 
   for(let i=coins.length-1;i>=0;i--){
@@ -417,7 +352,7 @@ function update(){
     if(coins[i].x<-20) coins.splice(i,1);
   }
 
-  const rate=Math.max(44,132-lv*4);
+  const rate=Math.max(44,135-lv*4);
   if(frm%rate===0) addPipe();
 }
 
@@ -437,7 +372,7 @@ function loop(){
 function die(){
   bird.alive=false; run=false; cancelAnimationFrame(aid);
   lscore=score; lcoins=coins_n; lpipes=pipes.filter(p=>p.passed).length;
-  if(score>best){ best=score; localStorage.setItem('fp5',best); }
+  if(score>best){ best=score; localStorage.setItem('fp6',best); }
   hideHUD();
   const isTop=LB.length<10||score>(LB[LB.length-1]?.score||0);
   if(score>0&&isTop){
