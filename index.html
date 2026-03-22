@@ -19,12 +19,23 @@
   .start-btn{background:transparent;border:2px solid var(--pink);color:var(--pink);font-family:'Press Start 2P',monospace;font-size:clamp(0.55rem,2.5vw,0.75rem);padding:14px 28px;cursor:pointer;letter-spacing:0.15em;text-shadow:0 0 10px var(--pink);border-radius:4px;animation:glow-btn 2s infinite;width:100%;max-width:300px;}
   @keyframes glow-btn{0%,100%{box-shadow:0 0 10px rgba(255,0,110,0.3)}50%{box-shadow:0 0 30px rgba(255,0,110,0.7)}}
   .start-btn:active{background:rgba(255,0,110,0.15);transform:scale(0.97);}
-  .char-select{width:100%;max-width:360px;}
+  .char-select{width:100%;max-width:380px;}
   .char-label{font-size:clamp(0.32rem,1.5vw,0.44rem);color:var(--dim);text-align:center;margin-bottom:10px;letter-spacing:0.1em;}
-  .char-grid{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
-  .char-btn{width:52px;height:52px;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.12);border-radius:12px;font-size:1.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;touch-action:manipulation;}
+  .char-grid{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
+  .char-btn{
+    width:60px;height:60px;
+    background:rgba(255,255,255,0.04);
+    border:2px solid rgba(255,255,255,0.12);
+    border-radius:12px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:all 0.15s;touch-action:manipulation;
+    padding:0;overflow:hidden;
+  }
+  .char-btn canvas{display:block;}
   .char-btn:active{transform:scale(0.9);}
-  .char-btn.selected{border-color:var(--yellow);box-shadow:0 0 16px rgba(255,190,11,0.5);background:rgba(255,190,11,0.1);}
+  .char-btn.selected{border-color:var(--yellow);box-shadow:0 0 16px rgba(255,190,11,0.5);background:rgba(255,190,11,0.08);}
+  .char-name{font-size:0.22rem;color:var(--dim);text-align:center;margin-top:4px;}
+  .char-item{display:flex;flex-direction:column;align-items:center;}
   .menu-lb{width:100%;max-width:360px;background:rgba(255,0,110,0.06);border:1px solid rgba(255,0,110,0.2);border-radius:6px;padding:12px;}
   .menu-lb h3{font-size:clamp(0.35rem,1.6vw,0.48rem);color:var(--yellow);text-shadow:0 0 8px var(--yellow);text-align:center;margin-bottom:10px;}
   .lb-row{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;margin-bottom:4px;background:rgba(255,255,255,0.03);border-radius:3px;gap:4px;}
@@ -33,8 +44,8 @@
   .lb-rank.s{color:#aaaacc;}
   .lb-rank.b{color:#cc8844;}
   .lb-name{font-size:clamp(0.26rem,1.3vw,0.35rem);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .lb-lv{font-size:clamp(0.24rem,1.2vw,0.32rem);color:var(--green);text-shadow:0 0 4px var(--green);white-space:nowrap;margin:0 4px;}
-  .lb-score{font-size:clamp(0.24rem,1.2vw,0.32rem);color:var(--pink);text-shadow:0 0 4px var(--pink);}
+  .lb-lv{font-size:clamp(0.24rem,1.2vw,0.32rem);color:var(--green);white-space:nowrap;margin:0 4px;}
+  .lb-score{font-size:clamp(0.24rem,1.2vw,0.32rem);color:var(--pink);}
   .lb-empty{font-size:clamp(0.26rem,1.2vw,0.35rem);color:var(--dim);text-align:center;padding:8px;}
   #game{display:none;position:fixed;inset:0;z-index:10;}
   #game-canvas{display:block;}
@@ -85,7 +96,7 @@
 <div class="overlay" id="ov-name">
   <h2>🏆 OYUN BİTTİ</h2>
   <div class="score-big" id="name-sc">0</div>
-  <p style="font-size:clamp(0.3rem,1.4vw,0.42rem);color:var(--dim);text-align:center;">Skoru kaydetmek için isminizi girin:</p>
+  <p style="font-size:clamp(0.3rem,1.4vw,0.42rem);color:var(--dim);text-align:center;">İsmini gir, liderliğe gir!</p>
   <input class="name-input" id="name-inp" maxlength="10" placeholder="İSMİNİ YAZ" autocomplete="off"/>
   <button class="ov-btn" id="btn-save">KAYDET ▶</button>
   <button class="ov-btn green" id="btn-skip">ATLA</button>
@@ -130,26 +141,239 @@ function renderLB(id,data,max){
     </div>`).join('');
 }
 
-const CHARS=[
-  {emoji:'🐆',glow:'#ffbe0b'},{emoji:'🚀',glow:'#00f5ff'},
-  {emoji:'🛸',glow:'#cc00ff'},{emoji:'⭐',glow:'#ffbe0b'},
-  {emoji:'🦋',glow:'#ff006e'},{emoji:'🐉',glow:'#00ff88'},
-  {emoji:'🔥',glow:'#ff4400'},{emoji:'🌙',glow:'#aaaaff'},
+// ══════════════════════════════════════════
+// KARAKTERLERİ CANVAS İLE ÇİZ
+// ══════════════════════════════════════════
+function drawCharPreview(ctx, id, size, t) {
+  const s = size;
+  const cx = s/2, cy = s/2;
+  ctx.clearRect(0,0,s,s);
+
+  if (id === 0) {
+    // PARS — emoji
+    ctx.font = `${s*0.65}px serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.shadowColor='#ffbe0b'; ctx.shadowBlur=8;
+    ctx.fillText('🐆', cx, cy);
+    ctx.shadowBlur=0;
+
+  } else if (id === 1) {
+    // NEON ENERJİ TOPU — parlayan küre
+    const r = s*0.32;
+    const pulse = Math.sin(t*0.08)*0.15;
+    // Dış parıltı
+    const grd = ctx.createRadialGradient(cx,cy,r*0.1,cx,cy,r*(1.2+pulse));
+    grd.addColorStop(0,'rgba(0,255,255,0.9)');
+    grd.addColorStop(0.4,'rgba(0,180,255,0.6)');
+    grd.addColorStop(0.8,'rgba(0,80,255,0.2)');
+    grd.addColorStop(1,'transparent');
+    ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(cx,cy,r*(1.4+pulse),0,Math.PI*2); ctx.fill();
+    // İç çekirdek
+    const core = ctx.createRadialGradient(cx-r*0.2,cy-r*0.2,0,cx,cy,r);
+    core.addColorStop(0,'#ffffff');
+    core.addColorStop(0.3,'#88ffff');
+    core.addColorStop(0.7,'#0088ff');
+    core.addColorStop(1,'#0022aa');
+    ctx.fillStyle=core; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+    // Şimşek çizgileri
+    ctx.strokeStyle='rgba(255,255,255,0.8)'; ctx.lineWidth=1.5;
+    for(let i=0;i<4;i++){
+      const ang=t*0.05+i*(Math.PI/2);
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(ang)*r*0.3, cy+Math.sin(ang)*r*0.3);
+      ctx.lineTo(cx+Math.cos(ang)*r*0.9, cy+Math.sin(ang)*r*0.9);
+      ctx.stroke();
+    }
+
+  } else if (id === 2) {
+    // UZAY GEMİSİ — orijinal tasarım
+    const sc = s/50;
+    ctx.save(); ctx.translate(cx,cy);
+    // Arka ateş
+    ctx.shadowColor='#ff6600'; ctx.shadowBlur=10;
+    const fire = ctx.createLinearGradient(0,8*sc,0,20*sc);
+    fire.addColorStop(0,'#ff8800'); fire.addColorStop(1,'transparent');
+    ctx.fillStyle=fire;
+    ctx.beginPath();
+    ctx.moveTo(-5*sc,8*sc); ctx.lineTo(0,20*sc); ctx.lineTo(5*sc,8*sc);
+    ctx.fill();
+    // Gövde
+    ctx.shadowColor='#00f5ff'; ctx.shadowBlur=12;
+    const body = ctx.createLinearGradient(-12*sc,0,12*sc,0);
+    body.addColorStop(0,'#1a2a4a'); body.addColorStop(0.3,'#2a4a8a');
+    body.addColorStop(0.5,'#88ccff'); body.addColorStop(0.7,'#2a4a8a');
+    body.addColorStop(1,'#1a2a4a');
+    ctx.fillStyle=body;
+    ctx.beginPath();
+    ctx.moveTo(0,-18*sc); ctx.lineTo(12*sc,8*sc);
+    ctx.lineTo(8*sc,12*sc); ctx.lineTo(-8*sc,12*sc); ctx.lineTo(-12*sc,8*sc);
+    ctx.closePath(); ctx.fill();
+    // Kanatlar
+    ctx.fillStyle='#1a3a6a';
+    ctx.beginPath(); ctx.moveTo(12*sc,4*sc); ctx.lineTo(22*sc,12*sc); ctx.lineTo(12*sc,12*sc); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-12*sc,4*sc); ctx.lineTo(-22*sc,12*sc); ctx.lineTo(-12*sc,12*sc); ctx.fill();
+    // Kokpit
+    const cockpit = ctx.createRadialGradient(0,-8*sc,0,0,-8*sc,6*sc);
+    cockpit.addColorStop(0,'#aaeeff'); cockpit.addColorStop(1,'#224488');
+    ctx.fillStyle=cockpit;
+    ctx.beginPath(); ctx.arc(0,-8*sc,6*sc,0,Math.PI*2); ctx.fill();
+    // Silah
+    ctx.fillStyle='#88aacc'; ctx.shadowBlur=0;
+    ctx.fillRect(-1.5*sc,-18*sc,3*sc,6*sc);
+    ctx.restore();
+
+  } else if (id === 3) {
+    // PİKSEL UZAYLI 1 — Neon Yeşil "Zappy"
+    const p = s/12; // piksel boyutu
+    ctx.save(); ctx.translate(cx - p*4, cy - p*4);
+    // Piksel map: 0=boş, 1=koyu, 2=parlak, 3=göz
+    const map = [
+      [0,0,1,1,1,1,0,0],
+      [0,1,1,1,1,1,1,0],
+      [1,1,2,1,1,2,1,1],
+      [1,1,1,1,1,1,1,1],
+      [0,1,3,1,1,3,1,0],
+      [1,0,1,1,1,1,0,1],
+      [0,1,0,0,0,0,1,0],
+    ];
+    const colors={1:'#00aa44',2:'#00ff88',3:'#ffffff'};
+    map.forEach((row,ry)=>row.forEach((cell,rx)=>{
+      if(!cell)return;
+      ctx.shadowColor='#00ff88'; ctx.shadowBlur=cell===2?8:3;
+      ctx.fillStyle=colors[cell]||'#00aa44';
+      ctx.fillRect(rx*p, ry*p, p-0.5, p-0.5);
+    }));
+    // Anten
+    ctx.fillStyle='#00ff88'; ctx.shadowColor='#00ff88'; ctx.shadowBlur=6;
+    ctx.fillRect(2*p,-p,p,p); ctx.fillRect(5*p,-p,p,p);
+    ctx.restore();
+
+  } else if (id === 4) {
+    // PİKSEL UZAYLI 2 — Ateşli Kırmızı "Blazer"
+    const p = s/12;
+    ctx.save(); ctx.translate(cx - p*4, cy - p*4);
+    const map = [
+      [0,1,0,1,1,0,1,0],
+      [0,1,1,1,1,1,1,0],
+      [1,2,1,1,1,1,2,1],
+      [1,1,1,1,1,1,1,1],
+      [1,1,3,3,3,3,1,1],
+      [0,1,1,0,0,1,1,0],
+      [1,0,1,0,0,1,0,1],
+    ];
+    const colors={1:'#cc0000',2:'#ff4400',3:'#ffaa00'};
+    map.forEach((row,ry)=>row.forEach((cell,rx)=>{
+      if(!cell)return;
+      ctx.shadowColor='#ff2200'; ctx.shadowBlur=cell===2?10:3;
+      ctx.fillStyle=colors[cell]||'#cc0000';
+      ctx.fillRect(rx*p, ry*p, p-0.5, p-0.5);
+    }));
+    ctx.fillStyle='#ff4400'; ctx.shadowColor='#ff4400'; ctx.shadowBlur=8;
+    ctx.fillRect(3*p,-p,2*p,p);
+    ctx.restore();
+
+  } else if (id === 5) {
+    // PİKSEL UZAYLI 3 — Buz Mavisi "Frozy"
+    const p = s/12;
+    ctx.save(); ctx.translate(cx - p*4, cy - p*4);
+    const map = [
+      [0,0,1,0,0,1,0,0],
+      [0,1,1,1,1,1,1,0],
+      [1,2,1,1,1,1,2,1],
+      [1,1,1,1,1,1,1,1],
+      [1,1,3,1,1,3,1,1],
+      [0,1,1,1,1,1,1,0],
+      [0,0,1,0,0,1,0,0],
+    ];
+    const colors={1:'#0066cc',2:'#aaddff',3:'#ffffff'};
+    map.forEach((row,ry)=>row.forEach((cell,rx)=>{
+      if(!cell)return;
+      ctx.shadowColor='#44aaff'; ctx.shadowBlur=cell===2?10:3;
+      ctx.fillStyle=colors[cell]||'#0066cc';
+      ctx.fillRect(rx*p, ry*p, p-0.5, p-0.5);
+    }));
+    ctx.fillStyle='#aaddff'; ctx.shadowColor='#aaddff'; ctx.shadowBlur=8;
+    ctx.fillRect(1*p,-p,p,p); ctx.fillRect(6*p,-p,p,p);
+    ctx.restore();
+
+  } else if (id === 6) {
+    // PİKSEL UZAYLI 4 — Mor Kral "Vexor"
+    const p = s/12;
+    ctx.save(); ctx.translate(cx - p*4, cy - p*3.5);
+    const map = [
+      [1,0,1,0,0,1,0,1],
+      [0,1,1,1,1,1,1,0],
+      [1,2,1,1,1,1,2,1],
+      [1,1,1,1,1,1,1,1],
+      [0,1,3,1,1,3,1,0],
+      [1,1,0,1,1,0,1,1],
+      [0,1,0,0,0,0,1,0],
+      [1,0,0,0,0,0,0,1],
+    ];
+    const colors={1:'#6600cc',2:'#cc44ff',3:'#ffee00'};
+    map.forEach((row,ry)=>row.forEach((cell,rx)=>{
+      if(!cell)return;
+      ctx.shadowColor='#aa00ff'; ctx.shadowBlur=cell===2?10:3;
+      ctx.fillStyle=colors[cell]||'#6600cc';
+      ctx.fillRect(rx*p, ry*p, p-0.5, p-0.5);
+    }));
+    ctx.restore();
+  }
+}
+
+// Karakter tanımları
+const CHARS = [
+  {id:0, name:'PARS',   glow:'#ffbe0b'},
+  {id:1, name:'ENERJİ', glow:'#00f5ff'},
+  {id:2, name:'GEMİ',   glow:'#00aaff'},
+  {id:3, name:'ZAPPY',  glow:'#00ff88'},
+  {id:4, name:'BLAZER', glow:'#ff4400'},
+  {id:5, name:'FROZY',  glow:'#44aaff'},
+  {id:6, name:'VEXOR',  glow:'#aa44ff'},
 ];
+
 let selectedChar=0;
+let menuAnim=0;
+const previewCanvases=[];
+
 const charGrid=document.getElementById('char-grid');
 CHARS.forEach((c,i)=>{
+  const item=document.createElement('div');
+  item.className='char-item';
   const btn=document.createElement('button');
   btn.className='char-btn'+(i===0?' selected':'');
-  btn.textContent=c.emoji;
-  btn.onclick=()=>{selectedChar=i;document.querySelectorAll('.char-btn').forEach((b,j)=>b.classList.toggle('selected',j===i));};
-  charGrid.appendChild(btn);
+  const pc=document.createElement('canvas');
+  pc.width=50; pc.height=50;
+  previewCanvases.push(pc);
+  btn.appendChild(pc);
+  btn.onclick=()=>{
+    selectedChar=i;
+    document.querySelectorAll('.char-btn').forEach((b,j)=>b.classList.toggle('selected',j===i));
+  };
+  const name=document.createElement('div');
+  name.className='char-name';
+  name.textContent=c.name;
+  item.appendChild(btn);
+  item.appendChild(name);
+  charGrid.appendChild(item);
 });
 
+// Menüde preview animasyonu
+function animateMenu(){
+  menuAnim++;
+  previewCanvases.forEach((pc,i)=>{
+    drawCharPreview(pc.getContext('2d'),i,50,menuAnim);
+  });
+  requestAnimationFrame(animateMenu);
+}
+animateMenu();
+
+// ── CANVAS ─────────────────────────────
 const CV=document.getElementById('game-canvas');
 const CX=CV.getContext('2d');
 const W=window.innerWidth,H=window.innerHeight;
-CV.width=W;CV.height=H;CV.style.width=W+'px';CV.style.height=H+'px';
+CV.width=W; CV.height=H;
+CV.style.width=W+'px'; CV.style.height=H+'px';
 
 const PIPE_W=Math.floor(W*0.18);
 const BIRD_R=Math.floor(W*0.07);
@@ -168,15 +392,13 @@ let score,coins_n,lv,sp,gr,jp;
 let run,aid,frm,pipesPassed;
 let lscore,lcoins,lpipes,llevel;
 let best=parseInt(localStorage.getItem('fp_best')||'0');
-let pipeHue=0; // Arcane renk değişimi
+let pipeHue=260;
+const RUNE_CHARS=['✦','◆','⬡','⟡','✧','⬢'];
 
 const STARS=Array.from({length:80},()=>({
   x:Math.random()*W,y:Math.random()*H,
   r:Math.random()*1.6+0.4,a:Math.random(),da:0.003+Math.random()*0.01
 }));
-
-// Arcane tarzı parçacıklar — boru kenarlarda yüzen rün/enerji
-const RUNE_CHARS=['✦','◆','⬡','⟡','✧','⬢'];
 
 function lvv(s,m,l){return s+(m-s)*Math.min((l-1)/(MAX_LV-1),1);}
 function applyLv(){sp=lvv(SP_S,SP_M,lv);gr=lvv(GR_S,GR_M,lv);jp=lvv(JP_S,JP_M,lv);}
@@ -187,33 +409,16 @@ function initBird(){bird={x:W*0.22,y:H*0.45,vy:0,r:BIRD_R,alive:true};}
 function addPipe(){
   const ga=getGa();
   const remaining=(H-GROUND_H)-ga;
-  const minTop=Math.floor(remaining*0.15);
-  const maxTop=Math.floor(remaining*0.55);
-  const topH=minTop+Math.random()*(maxTop-minTop);
-  // Her boru rengi biraz farklı — Arcane kristal efekti
-  const hue=pipeHue;
-  pipeHue=(pipeHue+40)%360;
+  const topH=remaining*0.15+Math.random()*(remaining*0.40);
+  const hue=pipeHue; pipeHue=(pipeHue+40)%360;
   pipes.push({x:W+PIPE_W,topH,ga,passed:false,hue});
   const mid=topH+ga/2;
   for(let i=0;i<3;i++){
     coins.push({x:W+PIPE_W*0.5+(W*0.12)*i+Math.random()*12,y:mid+(Math.random()-0.5)*ga*0.5,ok:false,a:Math.random()*Math.PI*2});
   }
-  // Rün parçacıkları ekle
   for(let i=0;i<3;i++){
-    runes.push({
-      x:W+PIPE_W/2+Math.random()*PIPE_W-PIPE_W/2,
-      y:Math.random()*topH,
-      char:RUNE_CHARS[Math.floor(Math.random()*RUNE_CHARS.length)],
-      a:Math.random(),speed:0.3+Math.random()*0.5,
-      size:8+Math.random()*10,hue,life:1
-    });
-    runes.push({
-      x:W+PIPE_W/2+Math.random()*PIPE_W-PIPE_W/2,
-      y:topH+ga+Math.random()*(H-topH-ga-GROUND_H),
-      char:RUNE_CHARS[Math.floor(Math.random()*RUNE_CHARS.length)],
-      a:Math.random(),speed:0.3+Math.random()*0.5,
-      size:8+Math.random()*10,hue,life:1
-    });
+    runes.push({x:W+PIPE_W/2+(Math.random()-0.5)*PIPE_W,y:Math.random()*topH,char:RUNE_CHARS[Math.floor(Math.random()*RUNE_CHARS.length)],a:Math.random(),speed:0.3+Math.random()*0.5,size:8+Math.random()*10,hue,life:1});
+    runes.push({x:W+PIPE_W/2+(Math.random()-0.5)*PIPE_W,y:topH+ga+Math.random()*(H-topH-ga-GROUND_H),char:RUNE_CHARS[Math.floor(Math.random()*RUNE_CHARS.length)],a:Math.random(),speed:0.3+Math.random()*0.5,size:8+Math.random()*10,hue,life:1});
   }
 }
 
@@ -225,122 +430,68 @@ function fx(x,y,col){
 }
 
 function drawBg(){
-  // Arcane arka plan — daha koyu, mor-mavi gradient
   const g=CX.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#04020e');
-  g.addColorStop(0.4,'#080418');
-  g.addColorStop(0.8,'#0a0520');
-  g.addColorStop(1,'#050210');
+  g.addColorStop(0,'#04020e');g.addColorStop(0.4,'#080418');g.addColorStop(0.8,'#0a0520');g.addColorStop(1,'#050210');
   CX.fillStyle=g;CX.fillRect(0,0,W,H);
-
-  // Büyülü parıltı — arka planda mor/mavi ışık
-  const glowX=W*0.5, glowY=H*0.4;
-  const radGlow=CX.createRadialGradient(glowX,glowY,0,glowX,glowY,W*0.6);
-  radGlow.addColorStop(0,'rgba(120,0,255,0.04)');
-  radGlow.addColorStop(0.5,'rgba(80,0,200,0.02)');
-  radGlow.addColorStop(1,'transparent');
-  CX.fillStyle=radGlow;CX.fillRect(0,0,W,H);
-
+  const glowX=W*0.5,glowY=H*0.4;
+  const rg=CX.createRadialGradient(glowX,glowY,0,glowX,glowY,W*0.6);
+  rg.addColorStop(0,'rgba(120,0,255,0.04)');rg.addColorStop(1,'transparent');
+  CX.fillStyle=rg;CX.fillRect(0,0,W,H);
   STARS.forEach(s=>{
     s.a+=s.da;if(s.a>1||s.a<0)s.da*=-1;
-    // Bazı yıldızlar mor/mavi — Arcane hissi
-    const col=Math.random()>0.8?`rgba(180,100,255,${s.a*0.8})`:`rgba(255,255,255,${s.a*0.65})`;
-    CX.globalAlpha=1;CX.fillStyle=col;
+    CX.globalAlpha=1;
+    CX.fillStyle=Math.random()>0.8?`rgba(180,100,255,${s.a*0.8})`:`rgba(255,255,255,${s.a*0.65})`;
     CX.beginPath();CX.arc(s.x,s.y,s.r,0,Math.PI*2);CX.fill();
   });
   CX.globalAlpha=1;
 }
 
 function drawGround(){
-  // Arcane zemin — parlak mor çizgi
   const gg=CX.createLinearGradient(0,H-GROUND_H,0,H);
-  gg.addColorStop(0,'#1a0a2e');
-  gg.addColorStop(1,'#0a0418');
+  gg.addColorStop(0,'#1a0a2e');gg.addColorStop(1,'#0a0418');
   CX.fillStyle=gg;CX.fillRect(0,H-GROUND_H,W,GROUND_H);
-
-  // Mor neon çizgi
   CX.shadowColor='#aa44ff';CX.shadowBlur=12;
   CX.strokeStyle='#cc66ff';CX.lineWidth=2;
   CX.beginPath();CX.moveTo(0,H-GROUND_H);CX.lineTo(W,H-GROUND_H);CX.stroke();
   CX.shadowBlur=0;
-
-  // Hareketli enerji akışı
   CX.strokeStyle='rgba(180,100,255,0.15)';CX.lineWidth=1;
-  for(let x=(frm*sp)%40;x<W;x+=40){
-    CX.beginPath();CX.moveTo(x,H-GROUND_H);CX.lineTo(x+20,H);CX.stroke();
-  }
+  for(let x=(frm*sp)%40;x<W;x+=40){CX.beginPath();CX.moveTo(x,H-GROUND_H);CX.lineTo(x+20,H);CX.stroke();}
 }
 
 function drawPipes(){
   pipes.forEach(p=>{
     const h=p.hue;
-    // Arcane kristal renkleri — mor, cyan, altın arası döner
-    const c1=`hsl(${h},80%,15%)`;
-    const c2=`hsl(${h},90%,45%)`;
-    const c3=`hsl(${h},70%,8%)`;
+    const c1=`hsl(${h},80%,15%)`,c2=`hsl(${h},90%,45%)`,c3=`hsl(${h},70%,8%)`;
     const tg=CX.createLinearGradient(p.x,0,p.x+PIPE_W,0);
-    tg.addColorStop(0,c1);
-    tg.addColorStop(0.3,c2);
-    tg.addColorStop(0.7,c2);
-    tg.addColorStop(1,c3);
-
-    CX.shadowColor=`hsl(${h},100%,60%)`;
-    CX.shadowBlur=16;
-    CX.fillStyle=tg;
-
+    tg.addColorStop(0,c1);tg.addColorStop(0.3,c2);tg.addColorStop(0.7,c2);tg.addColorStop(1,c3);
+    CX.shadowColor=`hsl(${h},100%,60%)`;CX.shadowBlur=16;CX.fillStyle=tg;
     const cap=Math.floor(PIPE_W*0.15);
-
-    // Üst boru gövdesi
     CX.fillRect(p.x,0,PIPE_W,p.topH);
-
-    // Üst boru başlığı — daha kalın, kristal görünüm
-    const capGrad=CX.createLinearGradient(p.x-cap,0,p.x+PIPE_W+cap,0);
-    capGrad.addColorStop(0,c3);
-    capGrad.addColorStop(0.2,c2);
-    capGrad.addColorStop(0.5,`hsl(${h},100%,65%)`);
-    capGrad.addColorStop(0.8,c2);
-    capGrad.addColorStop(1,c3);
-    CX.fillStyle=capGrad;
-    CX.fillRect(p.x-cap,p.topH-cap*2.5,PIPE_W+cap*2,cap*2.5);
-
-    // Alt boru
+    const cg=CX.createLinearGradient(p.x-cap,0,p.x+PIPE_W+cap,0);
+    cg.addColorStop(0,c3);cg.addColorStop(0.2,c2);cg.addColorStop(0.5,`hsl(${h},100%,65%)`);cg.addColorStop(0.8,c2);cg.addColorStop(1,c3);
+    CX.fillStyle=cg;CX.fillRect(p.x-cap,p.topH-cap*2.5,PIPE_W+cap*2,cap*2.5);
     CX.fillStyle=tg;
     const by=p.topH+p.ga;
     CX.fillRect(p.x,by,PIPE_W,H-by-GROUND_H);
-    CX.fillStyle=capGrad;
-    CX.fillRect(p.x-cap,by,PIPE_W+cap*2,cap*2.5);
-
-    // Kristal parlaması — boru kenarında beyaz şerit
+    CX.fillStyle=cg;CX.fillRect(p.x-cap,by,PIPE_W+cap*2,cap*2.5);
     CX.shadowBlur=0;
-    CX.fillStyle=`rgba(255,255,255,0.12)`;
-    CX.fillRect(p.x+2,0,4,p.topH);
-    CX.fillRect(p.x+2,by,4,H-by-GROUND_H);
-
-    // Boşluk arasında enerji halkası
+    CX.fillStyle='rgba(255,255,255,0.1)';
+    CX.fillRect(p.x+3,0,3,p.topH);CX.fillRect(p.x+3,by,3,H-by-GROUND_H);
     const midY=p.topH+p.ga/2;
-    CX.beginPath();
-    CX.shadowColor=`hsl(${h},100%,70%)`;
-    CX.shadowBlur=20;
-    CX.strokeStyle=`hsla(${h},100%,70%,0.6)`;
-    CX.lineWidth=2;
-    CX.arc(p.x+PIPE_W/2,midY,PIPE_W*0.35,0,Math.PI*2);
-    CX.stroke();
-    CX.shadowBlur=0;
+    CX.beginPath();CX.shadowColor=`hsl(${h},100%,70%)`;CX.shadowBlur=18;
+    CX.strokeStyle=`hsla(${h},100%,70%,0.5)`;CX.lineWidth=2;
+    CX.arc(p.x+PIPE_W/2,midY,PIPE_W*0.32,0,Math.PI*2);CX.stroke();CX.shadowBlur=0;
   });
 }
 
 function drawRunes(){
   runes=runes.filter(r=>r.life>0);
   runes.forEach(r=>{
-    r.x-=sp;
-    r.a+=0.03;
-    r.life-=0.004;
+    r.x-=sp;r.a+=0.03;r.life-=0.004;
     CX.globalAlpha=Math.max(0,r.life)*Math.abs(Math.sin(r.a))*0.7;
-    CX.shadowColor=`hsl(${r.hue},100%,70%)`;
-    CX.shadowBlur=10;
+    CX.shadowColor=`hsl(${r.hue},100%,70%)`;CX.shadowBlur=10;
     CX.fillStyle=`hsl(${r.hue},100%,75%)`;
-    CX.font=`${r.size}px serif`;
-    CX.textAlign='center';CX.textBaseline='middle';
+    CX.font=`${r.size}px serif`;CX.textAlign='center';CX.textBaseline='middle';
     CX.fillText(r.char,r.x,r.y+Math.sin(r.a*0.5)*8);
   });
   CX.globalAlpha=1;CX.shadowBlur=0;
@@ -350,7 +501,6 @@ function drawCoins(){
   coins.forEach(c=>{
     if(c.ok)return;
     c.a+=0.08;const w=Math.sin(c.a)*3;
-    // Arcane altın — mor parıltılı
     CX.shadowColor='#cc88ff';CX.shadowBlur=18;
     CX.fillStyle='#ffbe0b';
     CX.beginPath();CX.arc(c.x,c.y+w,COIN_R,0,Math.PI*2);CX.fill();
@@ -375,33 +525,34 @@ function drawParts(){
   CX.globalAlpha=1;CX.shadowBlur=0;
 }
 
+// Oyunda karakter çizimi — büyütülmüş
 function drawBird(){
   const ch=CHARS[selectedChar];
-  CX.save();CX.translate(bird.x,bird.y);
+  CX.save();
+  CX.translate(bird.x,bird.y);
   CX.rotate(Math.max(-0.5,Math.min(Math.PI/2,bird.vy*0.065)));
-  CX.shadowColor=ch.glow;CX.shadowBlur=28;
-  CX.font=`${BIRD_R*2.2}px serif`;
-  CX.textAlign='center';CX.textBaseline='middle';
-  CX.fillText(ch.emoji,0,0);
-  CX.shadowBlur=0;CX.restore();
+  const size=BIRD_R*2.8;
+  drawCharPreview(CX,ch.id,size,frm);
+  // Parıltı efekti
+  CX.shadowColor=ch.glow;CX.shadowBlur=20;
+  CX.beginPath();CX.arc(0,0,BIRD_R*0.3,0,Math.PI*2);
+  CX.fillStyle=ch.glow+'22';CX.fill();
+  CX.shadowBlur=0;
+  CX.restore();
 }
 
 function drawHUD(){
-  const fs1=Math.max(11,W*0.04);
-  const fs2=Math.max(10,W*0.035);
+  const fs1=Math.max(11,W*0.04),fs2=Math.max(10,W*0.035);
   CX.shadowColor='rgba(255,190,11,0.7)';CX.shadowBlur=8;
-  CX.fillStyle='#ffbe0b';
-  CX.font=`${fs1}px 'Press Start 2P',monospace`;
-  CX.textAlign='left';
-  CX.fillText(`🪙 ${coins_n}`,12,fs1+6);
+  CX.fillStyle='#ffbe0b';CX.font=`${fs1}px 'Press Start 2P',monospace`;
+  CX.textAlign='left';CX.fillText(`🪙 ${coins_n}`,12,fs1+6);
   CX.fillStyle='#cc66ff';CX.shadowColor='rgba(180,100,255,0.6)';
   CX.font=`${fs2}px 'Press Start 2P',monospace`;
   CX.fillText(`SEVİYE ${lv}`,12,fs1+fs2+12);
   CX.shadowColor='rgba(255,190,11,0.9)';CX.shadowBlur=14;
   CX.fillStyle='#ffbe0b';
   CX.font=`bold ${Math.max(20,W*0.07)}px 'Press Start 2P',monospace`;
-  CX.textAlign='center';
-  CX.fillText(score,W/2,Math.max(28,W*0.08));
+  CX.textAlign='center';CX.fillText(score,W/2,Math.max(28,W*0.08));
   CX.shadowBlur=0;
 }
 
@@ -481,7 +632,6 @@ function startGame(){
 }
 
 function jump(){if(run)bird.vy=jp;}
-
 document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();jump();}});
 CV.addEventListener('click',jump);
 CV.addEventListener('touchstart',e=>{e.preventDefault();jump();},{passive:false});
