@@ -11,17 +11,31 @@
   body{background:var(--bg);font-family:'Press Start 2P',monospace;min-height:100vh;overflow:hidden;color:var(--text);}
   body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);pointer-events:none;z-index:100;}
   body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.7) 100%);pointer-events:none;z-index:99;}
-  #menu{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:20px;position:relative;z-index:10;}
-  #menu h1{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(1.3rem,6vw,2.8rem);letter-spacing:0.2em;text-align:center;margin-bottom:6px;animation:flicker 4s infinite;}
+  #menu{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:20px;position:relative;z-index:10;}
+  #menu h1{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(1.3rem,6vw,2.8rem);letter-spacing:0.2em;text-align:center;margin-bottom:4px;animation:flicker 4s infinite;}
   @keyframes flicker{0%,94%,100%{opacity:1}95%{opacity:.7}97%{opacity:.5}98%{opacity:1}}
   .t1{color:var(--yellow);text-shadow:0 0 15px var(--yellow),0 0 40px var(--yellow);}
   .t2{color:var(--pink);text-shadow:0 0 15px var(--pink),0 0 40px var(--pink);}
-  .pars-big{font-size:clamp(3rem,10vw,5rem);animation:bounce 1.2s ease-in-out infinite;filter:drop-shadow(0 0 16px rgba(255,190,11,0.9));}
-  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
   .start-btn{background:transparent;border:2px solid var(--pink);color:var(--pink);font-family:'Press Start 2P',monospace;font-size:clamp(0.55rem,2.5vw,0.75rem);padding:14px 28px;cursor:pointer;letter-spacing:0.15em;text-shadow:0 0 10px var(--pink);border-radius:4px;animation:glow-btn 2s infinite;width:100%;max-width:300px;}
   @keyframes glow-btn{0%,100%{box-shadow:0 0 10px rgba(255,0,110,0.3)}50%{box-shadow:0 0 30px rgba(255,0,110,0.7)}}
   .start-btn:active{background:rgba(255,0,110,0.15);transform:scale(0.97);}
-  .menu-lb{width:100%;max-width:360px;background:rgba(255,0,110,0.06);border:1px solid rgba(255,0,110,0.2);border-radius:6px;padding:14px;}
+
+  /* Karakter seçimi */
+  .char-select{width:100%;max-width:360px;}
+  .char-label{font-size:clamp(0.32rem,1.5vw,0.44rem);color:var(--dim);text-align:center;margin-bottom:10px;letter-spacing:0.1em;}
+  .char-grid{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;}
+  .char-btn{
+    width:56px;height:56px;
+    background:rgba(255,255,255,0.04);
+    border:2px solid rgba(255,255,255,0.12);
+    border-radius:12px;font-size:1.8rem;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:all 0.15s;touch-action:manipulation;
+  }
+  .char-btn:active{transform:scale(0.9);}
+  .char-btn.selected{border-color:var(--yellow);box-shadow:0 0 16px rgba(255,190,11,0.5);background:rgba(255,190,11,0.1);}
+
+  .menu-lb{width:100%;max-width:360px;background:rgba(255,0,110,0.06);border:1px solid rgba(255,0,110,0.2);border-radius:6px;padding:12px;}
   .menu-lb h3{font-size:clamp(0.38rem,1.8vw,0.52rem);color:var(--yellow);text-shadow:0 0 8px var(--yellow);text-align:center;margin-bottom:10px;}
   .lb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;margin-bottom:4px;background:rgba(255,255,255,0.03);border-radius:3px;gap:6px;}
   .lb-rank{font-size:clamp(0.28rem,1.4vw,0.38rem);min-width:22px;color:var(--dim);}
@@ -31,21 +45,10 @@
   .lb-name{font-size:clamp(0.28rem,1.4vw,0.38rem);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .lb-score{font-size:clamp(0.28rem,1.4vw,0.38rem);color:var(--pink);text-shadow:0 0 4px var(--pink);}
   .lb-empty{font-size:clamp(0.26rem,1.2vw,0.35rem);color:var(--dim);text-align:center;padding:8px;}
+
   #game{display:none;position:fixed;inset:0;z-index:10;}
   #game-canvas{display:block;}
-  /* Tap butonu — sadece emoji, yazı yok */
-  #tap-btn{
-    display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-    width:72px;height:72px;
-    background:linear-gradient(135deg,rgba(255,0,110,0.25),rgba(255,0,110,0.1));
-    border:2px solid rgba(255,0,110,0.6);
-    color:var(--pink);font-size:2rem;
-    border-radius:50%;cursor:pointer;
-    text-shadow:0 0 10px var(--pink);
-    touch-action:manipulation;user-select:none;-webkit-user-select:none;z-index:500;
-    box-shadow:0 0 20px rgba(255,0,110,0.3),inset 0 0 20px rgba(255,0,110,0.05);
-  }
-  #tap-btn:active{background:rgba(255,0,110,0.4);transform:translateX(-50%) scale(0.92);box-shadow:0 0 40px rgba(255,0,110,0.6);}
+
   .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:600;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;backdrop-filter:blur(4px);}
   .overlay.show{display:flex;}
   .overlay h2{font-family:'Orbitron',monospace;font-size:clamp(0.9rem,4vw,1.6rem);color:var(--pink);text-shadow:0 0 20px var(--pink);text-align:center;}
@@ -67,8 +70,15 @@
 
 <div id="menu">
   <h1><span class="t1">FLAPPY</span> <span class="t2">PARS</span></h1>
-  <div class="pars-big">🐆</div>
+
+  <!-- Karakter seçimi -->
+  <div class="char-select">
+    <div class="char-label">KARAKTERİNİ SEÇ</div>
+    <div class="char-grid" id="char-grid"></div>
+  </div>
+
   <button class="start-btn" id="start-btn">▶ OYNA</button>
+
   <div class="menu-lb">
     <h3>🏆 LİDERLİK TABLOSU</h3>
     <div id="lb-menu"><div class="lb-empty">Yükleniyor...</div></div>
@@ -79,7 +89,6 @@
 </div>
 
 <div id="game"><canvas id="game-canvas"></canvas></div>
-<button id="tap-btn">🐆</button>
 
 <div class="overlay" id="ov-go">
   <h2>OYUN BİTTİ</h2>
@@ -132,6 +141,36 @@ function renderLB(id,data,max){
     </div>`).join('');
 }
 
+// ── Karakterler ──────────────────────────
+const CHARS = [
+  { emoji:'🐆', name:'Pars',    glow:'#ffbe0b' },
+  { emoji:'🚀', name:'Roket',   glow:'#00f5ff' },
+  { emoji:'🛸', name:'UFO',     glow:'#cc00ff' },
+  { emoji:'⭐', name:'Yıldız',  glow:'#ffbe0b' },
+  { emoji:'🦋', name:'Kelebek', glow:'#ff006e' },
+  { emoji:'🐉', name:'Ejderha', glow:'#00ff88' },
+  { emoji:'🔥', name:'Ateş',    glow:'#ff4400' },
+  { emoji:'🌙', name:'Ay',      glow:'#aaaaff' },
+];
+
+let selectedChar = 0;
+
+const charGrid = document.getElementById('char-grid');
+CHARS.forEach((c,i)=>{
+  const btn = document.createElement('button');
+  btn.className = 'char-btn' + (i===0?' selected':'');
+  btn.textContent = c.emoji;
+  btn.title = c.name;
+  btn.onclick = ()=>{
+    selectedChar = i;
+    document.querySelectorAll('.char-btn').forEach((b,j)=>{
+      b.classList.toggle('selected', j===i);
+    });
+  };
+  charGrid.appendChild(btn);
+});
+
+// ── Canvas ───────────────────────────────
 const CV=document.getElementById('game-canvas');
 const CX=CV.getContext('2d');
 const W=window.innerWidth;
@@ -148,11 +187,7 @@ const PIPE_V=10,COIN_V=5;
 const GR_S=0.14,GR_M=0.40;
 const JP_S=-5.0,JP_M=-7.4;
 const SP_S=1.5,SP_M=5.5;
-
-// ✅ Her boru kendi ga değerini saklıyor — yükselme sorunu çözüldü
 const GA_S=H*0.42,GA_M=H*0.25;
-
-// ✅ Daha yakın borular
 const DIST_S=W*0.60;
 const DIST_M=W*0.42;
 
@@ -160,7 +195,7 @@ let bird,pipes,coins,parts;
 let score,coins_n,lv,sp,gr,jp;
 let run,aid,frm,pipesPassed;
 let lscore,lcoins,lpipes;
-let best=parseInt(localStorage.getItem('fp15')||'0');
+let best=parseInt(localStorage.getItem('fp16')||'0');
 
 const STARS=Array.from({length:80},()=>({
   x:Math.random()*W,y:Math.random()*H,
@@ -168,11 +203,7 @@ const STARS=Array.from({length:80},()=>({
 }));
 
 function lvv(s,m,l){return s+(m-s)*Math.min((l-1)/(MAX_LV-1),1);}
-function applyLv(){
-  sp=lvv(SP_S,SP_M,lv);
-  gr=lvv(GR_S,GR_M,lv);
-  jp=lvv(JP_S,JP_M,lv);
-}
+function applyLv(){sp=lvv(SP_S,SP_M,lv);gr=lvv(GR_S,GR_M,lv);jp=lvv(JP_S,JP_M,lv);}
 function getGa(){return lvv(GA_S,GA_M,lv);}
 function getDist(){return lvv(DIST_S,DIST_M,lv);}
 
@@ -185,8 +216,7 @@ function addPipe(){
   const minTop=Math.floor(remaining*0.15);
   const maxTop=Math.floor(remaining*0.55);
   const topH=minTop+Math.random()*(maxTop-minTop);
-  // ✅ ga her boruya özel — level değişince eski borular etkilenmiyor
-  pipes.push({x:W+PIPE_W, topH, ga, passed:false});
+  pipes.push({x:W+PIPE_W,topH,ga,passed:false});
   const mid=topH+ga/2;
   const gapArea=ga*0.5;
   for(let i=0;i<3;i++){
@@ -228,7 +258,6 @@ function drawGround(){
 }
 
 function drawPipes(){
-  // ✅ Her boru kendi ga'sıyla çiziliyor
   pipes.forEach(p=>{
     const tg=CX.createLinearGradient(p.x,0,p.x+PIPE_W,0);
     tg.addColorStop(0,'#005520');tg.addColorStop(0.4,'#00aa44');tg.addColorStop(1,'#003310');
@@ -272,12 +301,13 @@ function drawParts(){
 }
 
 function drawBird(){
+  const ch=CHARS[selectedChar];
   CX.save();CX.translate(bird.x,bird.y);
   CX.rotate(Math.max(-0.5,Math.min(Math.PI/2,bird.vy*0.065)));
-  CX.shadowColor='#ffbe0b';CX.shadowBlur=24;
+  CX.shadowColor=ch.glow;CX.shadowBlur=24;
   CX.font=`${BIRD_R*2.2}px serif`;
   CX.textAlign='center';CX.textBaseline='middle';
-  CX.fillText('🐆',0,0);
+  CX.fillText(ch.emoji,0,0);
   CX.shadowBlur=0;CX.restore();
 }
 
@@ -302,42 +332,29 @@ function drawHUD(){
 
 function update(){
   if(!bird.alive)return;
-  frm++;
-  bird.vy+=gr;bird.y+=bird.vy;
+  frm++;bird.vy+=gr;bird.y+=bird.vy;
   if(bird.y+bird.r>=H-GROUND_H||bird.y-bird.r<=0){die();return;}
-
   for(let i=pipes.length-1;i>=0;i--){
     pipes[i].x-=sp;
     if(!pipes[i].passed&&pipes[i].x+PIPE_W<bird.x){
-      pipes[i].passed=true;
-      score+=PIPE_V*lv;
-      pipesPassed++;
-      if(pipesPassed%3===0){
-        lv=Math.min(lv+1,MAX_LV);
-        applyLv();
-      }
+      pipes[i].passed=true;score+=PIPE_V*lv;pipesPassed++;
+      if(pipesPassed%3===0){lv=Math.min(lv+1,MAX_LV);applyLv();}
     }
-    // ✅ Çarpışma hesabında p.ga kullan
     const cap=Math.floor(PIPE_W*0.15),br=bird.r*0.7;
     if(bird.x+br>pipes[i].x-cap&&bird.x-br<pipes[i].x+PIPE_W+cap){
       if(bird.y-br<pipes[i].topH||bird.y+br>pipes[i].topH+pipes[i].ga){die();return;}
     }
     if(pipes[i].x+PIPE_W<-10)pipes.splice(i,1);
   }
-
-  // ✅ En sağdaki boruya göre yeni boru ekle
   const rightmostX=pipes.length>0?Math.max(...pipes.map(p=>p.x)):-999;
-  if(rightmostX<=W-getDist()){
-    addPipe();
-  }
-
+  if(rightmostX<=W-getDist())addPipe();
   for(let i=coins.length-1;i>=0;i--){
     coins[i].x-=sp;
     if(!coins[i].ok){
       const dx=bird.x-coins[i].x,dy=bird.y-coins[i].y;
       if(Math.sqrt(dx*dx+dy*dy)<bird.r+COIN_R){
         coins[i].ok=true;coins_n++;score+=COIN_V*lv;
-        fx(coins[i].x,coins[i].y,'#ffbe0b');
+        fx(coins[i].x,coins[i].y,CHARS[selectedChar].glow);
       }
     }
     if(coins[i].x<-20)coins.splice(i,1);
@@ -352,7 +369,7 @@ function loop(){
 function die(){
   bird.alive=false;run=false;cancelAnimationFrame(aid);
   lscore=score;lcoins=coins_n;lpipes=pipesPassed;
-  if(score>best){best=score;localStorage.setItem('fp15',best);}
+  if(score>best){best=score;localStorage.setItem('fp16',best);}
   const isTop=LB.length<10||score>(LB[LB.length-1]?.score||0);
   if(score>0&&isTop){
     document.getElementById('name-sc').textContent=score;
@@ -373,14 +390,12 @@ function showGO(){
 function showGame(){
   document.getElementById('menu').style.display='none';
   document.getElementById('game').style.display='block';
-  if('ontouchstart'in window)document.getElementById('tap-btn').style.display='flex';
 }
 
 function showMenu(){
   document.getElementById('ov-go').classList.remove('show');
   document.getElementById('ov-name').classList.remove('show');
   document.getElementById('game').style.display='none';
-  document.getElementById('tap-btn').style.display='none';
   document.getElementById('menu').style.display='flex';
   renderLB('lb-menu',LB,10);
 }
@@ -391,8 +406,7 @@ function startGame(){
   applyLv();run=true;
   document.getElementById('ov-go').classList.remove('show');
   document.getElementById('ov-name').classList.remove('show');
-  showGame();
-  addPipe();
+  showGame();addPipe();
   if(aid)cancelAnimationFrame(aid);
   aid=requestAnimationFrame(loop);
 }
@@ -402,8 +416,6 @@ function jump(){if(run)bird.vy=jp;}
 document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();jump();}});
 CV.addEventListener('click',jump);
 CV.addEventListener('touchstart',e=>{e.preventDefault();jump();},{passive:false});
-document.getElementById('tap-btn').addEventListener('touchstart',e=>{e.preventDefault();jump();},{passive:false});
-document.getElementById('tap-btn').addEventListener('click',jump);
 document.getElementById('start-btn').addEventListener('click',startGame);
 document.getElementById('btn-restart').addEventListener('click',startGame);
 document.getElementById('btn-menu').addEventListener('click',showMenu);
