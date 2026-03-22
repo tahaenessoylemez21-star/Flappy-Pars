@@ -11,8 +11,6 @@
   body{background:var(--bg);font-family:'Press Start 2P',monospace;min-height:100vh;overflow:hidden;color:var(--text);}
   body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);pointer-events:none;z-index:100;}
   body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.7) 100%);pointer-events:none;z-index:99;}
-
-  /* MENÜ */
   #menu{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:20px;position:relative;z-index:10;}
   #menu h1{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(1.3rem,6vw,2.8rem);letter-spacing:0.2em;text-align:center;margin-bottom:6px;animation:flicker 4s infinite;}
   @keyframes flicker{0%,94%,100%{opacity:1}95%{opacity:.7}97%{opacity:.5}98%{opacity:1}}
@@ -33,24 +31,10 @@
   .lb-name{font-size:clamp(0.28rem,1.4vw,0.38rem);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);}
   .lb-score{font-size:clamp(0.28rem,1.4vw,0.38rem);color:var(--pink);text-shadow:0 0 4px var(--pink);}
   .lb-empty{font-size:clamp(0.26rem,1.2vw,0.35rem);color:var(--dim);text-align:center;padding:8px;}
-
-  /* OYUN */
-  #game{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;position:relative;z-index:10;}
-  #game-canvas{display:block;border:1px solid rgba(255,0,110,0.25);box-shadow:0 0 20px rgba(255,0,110,0.1),0 0 60px rgba(255,0,110,0.05);border-radius:2px;image-rendering:pixelated;}
-
-  /* HUD üst bar */
-  #hud{display:none;position:fixed;top:0;left:0;right:0;padding:8px 14px;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,0,110,0.15);z-index:500;flex-direction:row;align-items:center;justify-content:space-between;}
-  .hud-left{display:flex;flex-direction:column;gap:4px;}
-  .hud-coins{font-size:clamp(0.4rem,2vw,0.56rem);color:var(--yellow);text-shadow:0 0 7px var(--yellow);}
-  .hud-level{font-size:clamp(0.36rem,1.8vw,0.5rem);color:var(--pink);text-shadow:0 0 6px var(--pink);}
-  .hud-score{font-size:clamp(0.8rem,3.5vw,1.2rem);color:var(--yellow);text-shadow:0 0 10px var(--yellow);}
-  .hud-best{font-size:clamp(0.3rem,1.4vw,0.42rem);color:var(--dim);text-align:right;}
-
-  /* Tap butonu */
+  #game{display:none;position:fixed;inset:0;z-index:10;}
+  #game-canvas{display:block;image-rendering:pixelated;}
   #tap-btn{display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);width:86%;max-width:400px;padding:20px;background:rgba(255,0,110,0.1);border:2px solid rgba(255,0,110,0.45);color:var(--pink);font-family:'Press Start 2P',monospace;font-size:clamp(0.65rem,3vw,0.85rem);border-radius:12px;cursor:pointer;text-shadow:0 0 8px var(--pink);touch-action:manipulation;user-select:none;-webkit-user-select:none;z-index:500;}
   #tap-btn:active{background:rgba(255,0,110,0.28);transform:translateX(-50%) scale(0.96);}
-
-  /* Overlay */
   .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:600;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;backdrop-filter:blur(4px);}
   .overlay.show{display:flex;}
   .overlay h2{font-family:'Orbitron',monospace;font-size:clamp(0.9rem,4vw,1.6rem);color:var(--pink);text-shadow:0 0 20px var(--pink);text-align:center;}
@@ -65,12 +49,11 @@
   .ov-btn.green{border-color:var(--green);color:var(--green);text-shadow:0 0 8px var(--green);}
   .name-input{background:rgba(255,0,110,0.08);border:1px solid rgba(255,0,110,0.4);color:var(--pink);font-family:'Press Start 2P',monospace;font-size:clamp(0.42rem,2vw,0.58rem);padding:12px 14px;border-radius:3px;text-align:center;width:100%;max-width:260px;letter-spacing:0.1em;outline:none;}
   .name-input::placeholder{color:var(--dim);}
-  .name-input:focus{border-color:rgba(255,0,110,0.8);box-shadow:0 0 12px rgba(255,0,110,0.25);}
+  .name-input:focus{border-color:rgba(255,0,110,0.8);}
 </style>
 </head>
 <body>
 
-<!-- MENÜ -->
 <div id="menu">
   <h1><span class="t1">FLAPPY</span> <span class="t2">PARS</span></h1>
   <div class="pars-big">🐆</div>
@@ -84,24 +67,10 @@
   </div>
 </div>
 
-<!-- OYUN -->
-<div id="game">
-  <canvas id="game-canvas"></canvas>
-</div>
-
-<!-- HUD -->
-<div id="hud">
-  <div class="hud-left">
-    <div class="hud-coins" id="hud-coins">🪙 0</div>
-    <div class="hud-level" id="hud-level">SEVİYE 1</div>
-  </div>
-  <div><div class="hud-score" id="hud-score">0</div></div>
-  <div><div class="hud-best" id="hud-best">EN İYİ: 0</div></div>
-</div>
+<div id="game"><canvas id="game-canvas"></canvas></div>
 
 <button id="tap-btn">🐆 ZIPLA!</button>
 
-<!-- OYUN SONU -->
 <div class="overlay" id="ov-go">
   <h2>OYUN BİTTİ</h2>
   <div class="score-big" id="go-score">0</div>
@@ -112,7 +81,6 @@
   <button class="ov-btn green" id="btn-menu">ANA MENÜ</button>
 </div>
 
-<!-- İSİM -->
 <div class="overlay" id="ov-name">
   <h2>🏆 YENİ REKOR!</h2>
   <div class="score-big" id="name-sc">0</div>
@@ -159,35 +127,34 @@ function renderLB(id,data,max){
     </div>`).join('');
 }
 
-// ── CANVAS — İLK VERSIYONDAKI GİBİ SABİT BOYUT ──
 const CV=document.getElementById('game-canvas');
 const CX=CV.getContext('2d');
 
-// İlk versiyondaki gibi ekrana göre ama makul boyut
-const W=Math.min(Math.floor(window.innerWidth*0.82),360);
-const H=Math.min(Math.floor(window.innerHeight*0.78),580);
-CV.width=W; CV.height=H;
+// TAM EKRAN
+const W=window.innerWidth;
+const H=window.innerHeight;
+CV.width=W;
+CV.height=H;
+CV.style.width=W+'px';
+CV.style.height=H+'px';
 
-// ── SABİTLER — İLK VERSİYON DEĞERLERİ ──
 const PIPE_W=44;
 const COIN_R=10;
 const MAX_LV=20;
-const PIPE_V=10, COIN_V=5;
-
-// Çok yavaş başlayıp kademeli zorlaşan değerler
-const GR_S=0.14, GR_M=0.40;
-const JP_S=-5.0, JP_M=-7.4;
-const SP_S=1.1,  SP_M=3.6;
-const GA_S=190,  GA_M=108;
+const PIPE_V=10,COIN_V=5;
+const GR_S=0.14,GR_M=0.40;
+const JP_S=-5.0,JP_M=-7.4;
+const SP_S=1.1,SP_M=3.6;
+const GA_S=190,GA_M=108;
 
 let bird,pipes,coins,parts;
 let score,coins_n,lv,sp,ga,gr,jp;
 let run,aid,frm;
 let lscore,lcoins,lpipes;
-let best=parseInt(localStorage.getItem('fp7')||'0');
+let best=parseInt(localStorage.getItem('fp8')||'0');
 
-const STARS=Array.from({length:55},()=>({
-  x:Math.random()*400,y:Math.random()*600,
+const STARS=Array.from({length:80},()=>({
+  x:Math.random()*W,y:Math.random()*H,
   r:Math.random()*1.4+0.3,a:Math.random(),da:0.004+Math.random()*0.012
 }));
 
@@ -292,23 +259,23 @@ function drawBird(){
   CX.shadowBlur=0;CX.restore();
 }
 
-function drawHUDCanvas(){
-  // Sol üst: altın ve seviye canvas içinde
+function drawHUD(){
+  // Sol üst: altın ve seviye
   CX.shadowColor='rgba(255,190,11,0.6)';CX.shadowBlur=8;
   CX.fillStyle='#ffbe0b';
-  CX.font=`${Math.min(W*0.05,14)}px 'Press Start 2P',monospace`;
+  CX.font=`${Math.min(W*0.045,14)}px 'Press Start 2P',monospace`;
   CX.textAlign='left';
   CX.fillText(`🪙 ${coins_n}`,10,22);
-  CX.font=`${Math.min(W*0.045,12)}px 'Press Start 2P',monospace`;
   CX.fillStyle='#ff006e';
   CX.shadowColor='rgba(255,0,110,0.6)';
+  CX.font=`${Math.min(W*0.04,12)}px 'Press Start 2P',monospace`;
   CX.fillText(`SEVİYE ${lv}`,10,40);
-  // Orta: skor
+  // Orta üst: skor
   CX.shadowColor='rgba(255,190,11,0.8)';CX.shadowBlur=12;
   CX.fillStyle='#ffbe0b';
-  CX.font=`bold ${Math.min(W*0.09,28)}px 'Press Start 2P',monospace`;
+  CX.font=`bold ${Math.min(W*0.08,26)}px 'Press Start 2P',monospace`;
   CX.textAlign='center';
-  CX.fillText(score,W/2,36);
+  CX.fillText(score,W/2,34);
   CX.shadowBlur=0;
 }
 
@@ -317,7 +284,6 @@ function update(){
   frm++;
   bird.vy+=gr;bird.y+=bird.vy;
   if(bird.y+bird.r>=H-28||bird.y-bird.r<=0){die();return;}
-
   for(let i=pipes.length-1;i>=0;i--){
     pipes[i].x-=sp;
     if(!pipes[i].passed&&pipes[i].x+PIPE_W<bird.x){
@@ -331,7 +297,6 @@ function update(){
     }
     if(pipes[i].x+PIPE_W<-10)pipes.splice(i,1);
   }
-
   for(let i=coins.length-1;i>=0;i--){
     coins[i].x-=sp;
     if(!coins[i].ok){
@@ -344,21 +309,20 @@ function update(){
     }
     if(coins[i].x<-20)coins.splice(i,1);
   }
-
   const rate=Math.max(44,132-lv*4);
   if(frm%rate===0)addPipe();
 }
 
 function loop(){
   update();
-  drawBg();drawPipes();drawCoins();drawParts();drawGround();drawBird();drawHUDCanvas();
+  drawBg();drawPipes();drawCoins();drawParts();drawGround();drawBird();drawHUD();
   if(run)aid=requestAnimationFrame(loop);
 }
 
 function die(){
   bird.alive=false;run=false;cancelAnimationFrame(aid);
   lscore=score;lcoins=coins_n;lpipes=pipes.filter(p=>p.passed).length;
-  if(score>best){best=score;localStorage.setItem('fp7',best);}
+  if(score>best){best=score;localStorage.setItem('fp8',best);}
   const isTop=LB.length<10||score>(LB[LB.length-1]?.score||0);
   if(score>0&&isTop){
     document.getElementById('name-sc').textContent=score;
@@ -378,7 +342,7 @@ function showGO(){
 
 function showGame(){
   document.getElementById('menu').style.display='none';
-  document.getElementById('game').style.display='flex';
+  document.getElementById('game').style.display='block';
   if('ontouchstart'in window)document.getElementById('tap-btn').style.display='block';
 }
 
