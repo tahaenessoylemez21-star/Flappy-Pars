@@ -23,7 +23,8 @@
   .char-label{font-size:clamp(0.32rem,1.5vw,0.44rem);color:var(--dim);text-align:center;margin-bottom:10px;letter-spacing:0.1em;}
   .char-grid{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
   .char-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
-  .char-btn{width:60px;height:60px;background:rgba(255,255,255,0.04);border:2px solid rgba(255,255,255,0.12);border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;touch-action:manipulation;padding:0;}
+  .char-btn{width:60px;height:60px;background:rgba(20,10,40,0.8);border:2px solid rgba(255,255,255,0.12);border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;touch-action:manipulation;padding:0;}
+  .char-btn canvas{display:block;}
   .char-btn:active{transform:scale(0.9);}
   .char-btn.selected{border-color:var(--yellow);box-shadow:0 0 16px rgba(255,190,11,0.5);background:rgba(255,190,11,0.08);}
   .char-name{font-size:0.22rem;color:var(--dim);text-align:center;}
@@ -132,20 +133,19 @@ function renderLB(id,data,max){
     </div>`).join('');
 }
 
-// ── KARAKTERLERİ ÇİZ ──────────────────────
-function drawChar(ctx, id, size, t) {
-  const s=size, cx=s/2, cy=s/2;
+// ── KARAKTERLERİ ÇİZ — clearRect YOK, sadece şekil çiz ──
+function drawChar(ctx, id, s, t, ox, oy) {
+  // ox,oy = orijin noktası (merkez)
+  const cx=ox, cy=oy;
   ctx.save();
-  ctx.clearRect(0,0,s,s);
-  ctx.globalAlpha=1;
-  ctx.globalCompositeOperation='source-over';
 
   if(id===0){
-    // PARS — emoji, transparan arka plan
-    ctx.shadowColor='#ffbe0b';ctx.shadowBlur=6;
+    // PARS — emoji
+    ctx.shadowColor='#ffbe0b';ctx.shadowBlur=8;
     ctx.font=`${s*0.62}px serif`;
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('🐆',cx,cy+s*0.04);
+    ctx.fillText('🐆',cx,cy);
+    ctx.shadowBlur=0;
 
   }else if(id===1){
     // ENERJİ TOPU
@@ -172,12 +172,10 @@ function drawChar(ctx, id, size, t) {
     // UZAY GEMİSİ
     const sc=s/52;
     ctx.translate(cx,cy);
-    // Ateş
     const fire=ctx.createLinearGradient(0,8*sc,0,18*sc);
     fire.addColorStop(0,'rgba(255,136,0,0.9)');fire.addColorStop(1,'rgba(255,80,0,0)');
     ctx.fillStyle=fire;
     ctx.beginPath();ctx.moveTo(-4*sc,8*sc);ctx.lineTo(0,18*sc);ctx.lineTo(4*sc,8*sc);ctx.fill();
-    // Gövde
     const body=ctx.createLinearGradient(-11*sc,0,11*sc,0);
     body.addColorStop(0,'#1a2a4a');body.addColorStop(0.3,'#2a5a9a');
     body.addColorStop(0.5,'#88ccff');body.addColorStop(0.7,'#2a5a9a');body.addColorStop(1,'#1a2a4a');
@@ -193,7 +191,7 @@ function drawChar(ctx, id, size, t) {
     ctx.fillStyle='#88aacc';ctx.fillRect(-1.5*sc,-16*sc,3*sc,5*sc);
 
   }else if(id===3){
-    // ZAPPY — yeşil
+    // ZAPPY
     const p=s/13;
     ctx.translate(cx-p*4,cy-p*3.5);
     const m=[[0,0,1,1,1,1,0,0],[0,1,1,1,1,1,1,0],[1,1,2,1,1,2,1,1],[1,1,1,1,1,1,1,1],[0,1,3,1,1,3,1,0],[1,0,1,1,1,1,0,1],[0,1,0,0,0,0,1,0]];
@@ -207,7 +205,7 @@ function drawChar(ctx, id, size, t) {
     ctx.fillRect(2*p,-p,p,p);ctx.fillRect(5*p,-p,p,p);
 
   }else if(id===4){
-    // BLAZER — kırmızı
+    // BLAZER
     const p=s/13;
     ctx.translate(cx-p*4,cy-p*3.5);
     const m=[[0,1,0,1,1,0,1,0],[0,1,1,1,1,1,1,0],[1,2,1,1,1,1,2,1],[1,1,1,1,1,1,1,1],[1,1,3,3,3,3,1,1],[0,1,1,0,0,1,1,0],[1,0,1,0,0,1,0,1]];
@@ -221,7 +219,7 @@ function drawChar(ctx, id, size, t) {
     ctx.fillRect(3*p,-p,2*p,p);
 
   }else if(id===5){
-    // FROZY — mavi
+    // FROZY
     const p=s/13;
     ctx.translate(cx-p*4,cy-p*3.5);
     const m=[[0,0,1,0,0,1,0,0],[0,1,1,1,1,1,1,0],[1,2,1,1,1,1,2,1],[1,1,1,1,1,1,1,1],[1,1,3,1,1,3,1,1],[0,1,1,1,1,1,1,0],[0,0,1,0,0,1,0,0]];
@@ -235,7 +233,7 @@ function drawChar(ctx, id, size, t) {
     ctx.fillRect(1*p,-p,p,p);ctx.fillRect(6*p,-p,p,p);
 
   }else if(id===6){
-    // VEXOR — mor
+    // VEXOR
     const p=s/13;
     ctx.translate(cx-p*4,cy-p*4);
     const m=[[1,0,1,0,0,1,0,1],[0,1,1,1,1,1,1,0],[1,2,1,1,1,1,2,1],[1,1,1,1,1,1,1,1],[0,1,3,1,1,3,1,0],[1,1,0,1,1,0,1,1],[0,1,0,0,0,0,1,0],[1,0,0,0,0,0,0,1]];
@@ -267,9 +265,10 @@ CHARS.forEach((c,i)=>{
   item.className='char-item';
   const btn=document.createElement('button');
   btn.className='char-btn'+(i===0?' selected':'');
+  // ✅ Her preview canvas koyu arka planlı
   const pc=document.createElement('canvas');
   pc.width=54;pc.height=54;
-  pcs.push(pc);
+  pcs.push({canvas:pc,id:c.id});
   btn.appendChild(pc);
   btn.onclick=()=>{
     selectedChar=i;
@@ -283,12 +282,19 @@ CHARS.forEach((c,i)=>{
 
 function animMenu(){
   menuT++;
-  pcs.forEach((pc,i)=>drawChar(pc.getContext('2d'),i,54,menuT));
+  pcs.forEach(({canvas,id})=>{
+    const ctx=canvas.getContext('2d');
+    const s=54;
+    // ✅ Koyu arka plan çiz — siyah değil mor
+    ctx.fillStyle='rgba(10,5,20,1)';
+    ctx.fillRect(0,0,s,s);
+    drawChar(ctx,id,s,menuT,s/2,s/2);
+  });
   requestAnimationFrame(animMenu);
 }
 animMenu();
 
-// ── CANVAS ─────────────────────────────────
+// ── CANVAS ─────────────────────────
 const CV=document.getElementById('game-canvas');
 const CX=CV.getContext('2d');
 const W=window.innerWidth,H=window.innerHeight;
@@ -322,7 +328,6 @@ function initBird(){bird={x:W*0.22,y:H*0.45,vy:0,r:BIRD_R,alive:true};}
 
 function addPipe(){
   const ga=getGa();
-  // ✅ Boru yükseklikleri düzgün hesaplanıyor
   const minTop=GROUND_H+30;
   const maxTop=H-GROUND_H-ga-30;
   const topH=minTop+Math.random()*Math.max(10,maxTop-minTop);
@@ -376,15 +381,13 @@ function drawPipes(){
     tg.addColorStop(0,c1);tg.addColorStop(0.3,c2);tg.addColorStop(0.7,c2);tg.addColorStop(1,c3);
     CX.shadowColor=`hsl(${h},100%,60%)`;CX.shadowBlur=16;CX.fillStyle=tg;
     const cap=Math.floor(PIPE_W*0.15);
-    // ✅ Üst boru — sadece topH kadar
     CX.fillRect(p.x,0,PIPE_W,p.topH);
     const cg=CX.createLinearGradient(p.x-cap,0,p.x+PIPE_W+cap,0);
     cg.addColorStop(0,c3);cg.addColorStop(0.2,c2);cg.addColorStop(0.5,`hsl(${h},100%,65%)`);cg.addColorStop(0.8,c2);cg.addColorStop(1,c3);
     CX.fillStyle=cg;CX.fillRect(p.x-cap,p.topH-cap*2.5,PIPE_W+cap*2,cap*2.5);
-    // ✅ Alt boru — zeminde biter
     CX.fillStyle=tg;
     const by=p.topH+p.ga;
-    const botH=H-GROUND_H-by; // zeminde biter
+    const botH=H-GROUND_H-by;
     if(botH>0){
       CX.fillRect(p.x,by,PIPE_W,botH);
       CX.fillStyle=cg;CX.fillRect(p.x-cap,by,PIPE_W+cap*2,cap*2.5);
@@ -437,21 +440,17 @@ function drawParts(){
   CX.globalAlpha=1;CX.shadowBlur=0;
 }
 
-// ✅ Siyah kare yok — clip ile çiz
+// ✅ Direkt ana canvas'a çiz — siyah kare yok
 function drawBird(){
   const ch=CHARS[selectedChar];
-  const size=BIRD_R*2.8;
+  const size=BIRD_R*2.5;
   CX.save();
   CX.translate(bird.x,bird.y);
   CX.rotate(Math.max(-0.5,Math.min(Math.PI/2,bird.vy*0.065)));
-  // Glow efekti
   CX.shadowColor=ch.glow;CX.shadowBlur=20;
-  CX.beginPath();CX.arc(0,0,BIRD_R*0.5,0,Math.PI*2);
-  CX.fillStyle=ch.glow+'11';CX.fill();
+  // Merkez noktadan çiz
+  drawChar(CX,ch.id,size,frm,0,0);
   CX.shadowBlur=0;
-  // Karakteri ortala
-  CX.translate(-size/2,-size/2);
-  drawChar(CX,ch.id,size,frm);
   CX.restore();
 }
 
